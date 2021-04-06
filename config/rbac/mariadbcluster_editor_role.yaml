@@ -1,13 +1,13 @@
-# permissions for end users to edit mariadbs.
+# permissions for end users to edit mariadbclusters.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: mariadb-editor-role
+  name: mariadbcluster-editor-role
 rules:
 - apiGroups:
-  - server.mariadb.org
+  - mariadb.mariadb.org
   resources:
-  - mariadbs
+  - mariadbclusters
   verbs:
   - create
   - delete
@@ -17,8 +17,8 @@ rules:
   - update
   - watch
 - apiGroups:
-  - server.mariadb.org
+  - mariadb.mariadb.org
   resources:
-  - mariadbs/status
+  - mariadbclusters/status
   verbs:
   - get

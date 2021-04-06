@@ -31,7 +31,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	serverv1 "github.com/aldor007/mariadb-operator/api/v1"
+	mariadbv1alpha1 "github.com/aldor007/mariadb-operator/api/v1alpha1"
 	"github.com/aldor007/mariadb-operator/controllers"
 	//+kubebuilder:scaffold:imports
 )
@@ -44,7 +44,7 @@ var (
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 
-	utilruntime.Must(serverv1.AddToScheme(scheme))
+	utilruntime.Must(mariadbv1alpha1.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
 }
 
@@ -77,13 +77,14 @@ func main() {
 		setupLog.Error(err, "unable to start manager")
 		os.Exit(1)
 	}
-
-	if err = (&controllers.MariaDBReconciler{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("MariaDB"),
-		Scheme: mgr.GetScheme(),
+	if err = (&controllers.MariaDBClusterReconciler{
+		Client:       mgr.GetClient(),
+		DirectClient: mgr.GetAPIReader(),
+		Scheme:       mgr.GetScheme(),
+		Log:          ctrl.Log.WithName("controllers").WithName("MariaDBCluster"),
+		Scheme:       mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "MariaDB")
+		setupLog.Error(err, "unable to create controller", "controller", "MariaDBCluster")
 		os.Exit(1)
 	}
 	//+kubebuilder:scaffold:builder

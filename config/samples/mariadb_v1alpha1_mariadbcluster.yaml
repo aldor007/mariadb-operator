@@ -1,0 +1,7 @@
+apiVersion: mariadb.mariadb.org/v1alpha1
+kind: MariaDBCluster
+metadata:
+  name: mariadbcluster-sample
+spec:
+  # Add fields here
+  foo: bar

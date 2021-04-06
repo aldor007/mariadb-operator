@@ -9,8 +9,8 @@ resources:
     namespaced: true
   controller: true
   domain: mariadb.org
-  group: server
-  kind: MariaDB
-  path: github.com/aldor007/mariadb-operator/api/v1
-  version: v1
+  group: mariadb
+  kind: MariaDBCluster
+  path: github.com/aldor007/mariadb-operator/api/v1alpha1
+  version: v1alpha1
 version: "3"

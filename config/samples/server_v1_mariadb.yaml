@@ -1,7 +1,0 @@
-apiVersion: server.mariadb.org/v1
-kind: MariaDB
-metadata:
-  name: mariadb-sample
-spec:
-  # Add fields here
-  foo: bar
