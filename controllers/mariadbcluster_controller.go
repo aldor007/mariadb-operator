@@ -18,6 +18,9 @@ package controllers
 
 import (
 	"context"
+	"github.com/aldor007/mariadb-operator/resources"
+	"github.com/aldor007/mariadb-operator/resources/primary"
+	"github.com/aldor007/mariadb-operator/resources/replica"
 
 	"github.com/go-logr/logr"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -64,6 +67,17 @@ func (r *MariaDBClusterReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		}
 		// Error reading the object - requeue the request.
 		return ctrl.Result{}, err
+	}
+	reconcilers := []resources.ComponentReconciler{
+		primary.NewPrimary(r.Client, r.DirectClient, r.Scheme, instance),
+		replica.NewReplica(r.Client, r.DirectClient, r.Scheme, instance),
+	}
+
+	for _, rec := range reconcilers {
+		err = rec.Reconcile(ctx, log)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
 	}
 
 	return ctrl.Result{}, nil

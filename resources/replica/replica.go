@@ -1,21 +1,20 @@
-package primary
+package replica
 
 import (
 	"context"
 	mariadbv1alpha1 "github.com/aldor007/mariadb-operator/api/v1alpha1"
 	"github.com/aldor007/mariadb-operator/resources"
+	"github.com/go-logr/logr"
 	appsv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/types"
-
-	"github.com/go-logr/logr"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 const (
-	componentName = "primary-server"
+	componentName = "reploca-server"
 )
 
 // Reconciler implements the Component Reconciler
@@ -23,7 +22,7 @@ type Reconciler struct {
 	resources.Reconciler
 }
 
-func NewPrimary(client client.Client, directClient client.Reader, scheme *runtime.Scheme, cluster *mariadbv1alpha1.MariaDBCluster) *Reconciler {
+func NewReplica(client client.Client, directClient client.Reader, scheme *runtime.Scheme, cluster *mariadbv1alpha1.MariaDBCluster) *Reconciler {
 	return &Reconciler{
 		Reconciler: resources.Reconciler{
 			Client:         client,
@@ -39,7 +38,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, log logr.Logger) error {
 
 	log.V(1).Info("Reconciling")
 
-	statefulSet := r.Reconciler.CreateStatefulSet("primary")
+	statefulSet := r.Reconciler.CreateStatefulSet("replica")
 
 	found := &appsv1.StatefulSet{}
 	err := r.Client.Get(ctx, types.NamespacedName{
@@ -97,7 +96,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, log logr.Logger) error {
 		log.Info("Updated Deployment image. ")
 	}
 
-	svc := r.CreateService("primary")
+	svc := r.CreateService("replica")
 	foundSvc := &v1.Service{}
 	err = r.Client.Get(ctx, types.NamespacedName{
 		Name:      svc.Name,

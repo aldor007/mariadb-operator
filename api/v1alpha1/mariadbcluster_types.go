@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
@@ -35,8 +36,16 @@ type MariaDBClusterSpec struct {
 	// number of replica pods
 	ReplicaCount int32 `json:"replicaCount,omitempty"`
 
+	// secret reference for password
+	RootPassword corev1.SecretKeySelector `json:"rootPassword"`
+
 	// Image used for mariadb server
 	Image string `json:"image,omitempty"`
+
+	StorageClass string `json:"storageClass"`
+
+	// Database storage Size (Ex. 1Gi, 100Mi)
+	DataStorageSize string `json:"dataStorageSize"`
 
 	// A bucket URL that contains a xtrabackup to initialize the mysql database.
 	// +optional
