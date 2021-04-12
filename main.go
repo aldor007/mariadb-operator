@@ -82,7 +82,6 @@ func main() {
 		DirectClient: mgr.GetAPIReader(),
 		Scheme:       mgr.GetScheme(),
 		Log:          ctrl.Log.WithName("controllers").WithName("MariaDBCluster"),
-		Scheme:       mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "MariaDBCluster")
 		os.Exit(1)
