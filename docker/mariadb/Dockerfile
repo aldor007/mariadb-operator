@@ -10,7 +10,7 @@ RUN git clone --depth 1 --no-checkout https://github.com/kubernetes-retired/cont
   &&  go get -d -v ./... \
   && CGO_ENABLED=0 go build -ldflags '-w  -extldflags "-static"' -v  -o peer-finder ./peer-finder.go
 
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 ARG DB_VER
 ENV DEBIAN_FRONTEND noninteractive
 COPY --from=peer-finder-build /go/src/apps/peer-finder/peer-finder /usr/bin/peer-finder
@@ -27,8 +27,8 @@ EXPOSE 3306/tcp
 RUN apt update \
   && apt install -y -qq \
     software-properties-common \
-  && apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xF1656F24C74CD1D8 \
-  && add-apt-repository "deb [arch=amd64,arm64] http://mirror.rackspace.com/mariadb/repo/${DB_VER}/ubuntu bionic main" \
+  && apt-key adv --fetch-keys 'https://mariadb.org/mariadb_release_signing_key.asc' \
+  && add-apt-repository 'deb [arch=amd64,arm64,ppc64el] https://ftp.icm.edu.pl/pub/unix/database/mariadb/repo/10.5/ubuntu focal main' \
   && apt update \
   && apt install -y -qq \
     dnsutils \
