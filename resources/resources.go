@@ -39,28 +39,34 @@ func (r *Reconciler) CreateStatefulSet(dbType string) appsv1.StatefulSet {
 		SecretKeyRef: &r.MariaDBCluster.Spec.RootPassword,
 	}
 
-	dataVolume := "data"
+	headlessSvc := fmt.Sprintf("mariadb-headless-%s-%s", r.MariaDBCluster.Name, dbType)
+	dataVolume := fmt.Sprintf("data-%s", dbType)
 	statefulset := appsv1.StatefulSet{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprint("%s-%s", r.MariaDBCluster.Name, dbType),
+			Name:      fmt.Sprintf("%s-%s", r.MariaDBCluster.Name, dbType),
 			Namespace: r.MariaDBCluster.Namespace,
 		},
 		Spec: appsv1.StatefulSetSpec{
-			Replicas: &size,
+			Replicas:    &size,
+			ServiceName: fmt.Sprintf("%s-%s", r.MariaDBCluster.Name, dbType),
 			Selector: &metav1.LabelSelector{
 				MatchLabels: labels,
 			},
 			VolumeClaimTemplates: []corev1.PersistentVolumeClaim{
 				{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      dataVolume,
+						Namespace: r.MariaDBCluster.Namespace,
+					},
 					Spec: corev1.PersistentVolumeClaimSpec{
-						AccessModes: nil,
+						AccessModes: []corev1.PersistentVolumeAccessMode{corev1.ReadWriteOnce},
 						Selector:    nil,
 						Resources: corev1.ResourceRequirements{
 							Requests: corev1.ResourceList{
 								corev1.ResourceName(corev1.ResourceStorage): resource.MustParse(r.MariaDBCluster.Spec.DataStorageSize),
 							},
 						},
-						VolumeName:       dataVolume,
+
 						StorageClassName: &r.MariaDBCluster.Spec.StorageClass,
 					},
 				},
@@ -72,7 +78,7 @@ func (r *Reconciler) CreateStatefulSet(dbType string) appsv1.StatefulSet {
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{{
 						Image:           image,
-						ImagePullPolicy: corev1.PullIfNotPresent,
+						ImagePullPolicy: corev1.PullAlways,
 						Name:            "mariadb-service",
 						Ports: []corev1.ContainerPort{{
 							ContainerPort: 3306,
@@ -88,6 +94,18 @@ func (r *Reconciler) CreateStatefulSet(dbType string) appsv1.StatefulSet {
 							{
 								Name:      "MYSQL_ROOT_PASSWORD",
 								ValueFrom: rootPasswordSecret,
+							},
+							{
+								Name:  "K8S_SVC_NAME",
+								Value: headlessSvc,
+							},
+							{
+								Name: "MY_POD_IP",
+								ValueFrom: &corev1.EnvVarSource{
+									FieldRef: &corev1.ObjectFieldSelector{
+										FieldPath: `status.podIP`,
+									},
+								},
 							},
 						},
 					}},
@@ -161,6 +179,31 @@ func (r *Reconciler) CreateService(dbType string) corev1.Service {
 				TargetPort: intstr.FromInt(3306),
 			}},
 			Type: corev1.ServiceTypeClusterIP,
+		},
+	}
+
+	controllerutil.SetControllerReference(r.MariaDBCluster, &s, r.Scheme)
+	return s
+}
+func (r *Reconciler) CreateHeadlessService(dbType string) corev1.Service {
+	labels := utils.Labels(r.MariaDBCluster)
+	labels["type.mariadb.org"] = dbType
+
+	s := corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      fmt.Sprintf("mariadb-headless-%s-%s", r.MariaDBCluster.Name, dbType),
+			Namespace: r.MariaDBCluster.Namespace,
+			Labels:    labels,
+		},
+		Spec: corev1.ServiceSpec{
+			Selector: labels,
+			Ports: []corev1.ServicePort{{
+				Protocol:   corev1.ProtocolTCP,
+				Port:       3306,
+				TargetPort: intstr.FromInt(3306),
+			}},
+			Type:      corev1.ServiceTypeClusterIP,
+			ClusterIP: "None",
 		},
 	}
 

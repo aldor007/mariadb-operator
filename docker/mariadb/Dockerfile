@@ -2,11 +2,10 @@ FROM golang:1.12-alpine AS peer-finder-build
 LABEL stage=gobuilder
 LABEL app=peer-finder
 RUN apk add --no-cache git
+ARG TARGETARCH amd64
 WORKDIR /go/src/
-RUN git clone --depth 1 --no-checkout https://github.com/kubernetes-retired/contrib.git apps \
-  &&  cd ${GOPATH}/src/apps \
-  && git checkout master -- peer-finder \
-  && cd ${GOPATH}/src/apps/peer-finder \
+ADD peer-finder/ /go/src/apps/peer-finder
+RUN  cd /go/src/apps/peer-finder \
   &&  go get -d -v ./... \
   && CGO_ENABLED=0 go build -ldflags '-w  -extldflags "-static"' -v  -o peer-finder ./peer-finder.go
 
@@ -42,7 +41,7 @@ RUN apt update \
 RUN echo '!include /etc/config/my_extra.cnf' >> /etc/mysql/my.cnf
 
 COPY root /
-RUN /usr/libexec/container-setup.sh
+RUN bash /usr/libexec/container-setup.sh
 
 VOLUME ["/var/lib/mysql"]
 ENTRYPOINT ["/usr/bin/container-entrypoint.sh"]

@@ -3,5 +3,10 @@ kind: MariaDBCluster
 metadata:
   name: mariadbcluster-sample
 spec:
-  # Add fields here
-  foo: bar
+  primaryCount: 2
+  dataStorageSize: 1G
+  image: "ghcr.io/aldor007/mariadb-galera:1.0.2-2"
+  storageClass: nfs-cubie2
+  rootPassword:
+    name: mariadb-sample-root
+    key: password

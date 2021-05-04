@@ -40,6 +40,7 @@ type MariaDBClusterSpec struct {
 	RootPassword corev1.SecretKeySelector `json:"rootPassword"`
 
 	// Image used for mariadb server
+	// +kubebuilder:default:="ghcr.io/aldor007/mariadb-galera:1.0.1"
 	Image string `json:"image,omitempty"`
 
 	StorageClass string `json:"storageClass"`

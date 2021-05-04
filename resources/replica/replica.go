@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	componentName = "reploca-server"
+	componentName = "replica-server"
 )
 
 // Reconciler implements the Component Reconciler
@@ -68,7 +68,11 @@ func (r *Reconciler) Reconcile(ctx context.Context, log logr.Logger) error {
 	applyChange := false
 
 	// Ensure the deployment size is same as the spec
-	size := r.MariaDBCluster.Spec.PrimaryCount
+	size := r.MariaDBCluster.Spec.ReplicaCount
+	if size == 0 {
+		log.Info("Skipping processing")
+		return nil
+	}
 	if *statefulSet.Spec.Replicas != size {
 		statefulSet.Spec.Replicas = &size
 		applyChange = true

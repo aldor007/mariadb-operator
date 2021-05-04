@@ -97,7 +97,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, log logr.Logger) error {
 		log.Info("Updated Deployment image. ")
 	}
 
-	svc := r.CreateService("primary")
+	svc := r.CreateHeadlessService("primary")
 	foundSvc := &v1.Service{}
 	err = r.Client.Get(ctx, types.NamespacedName{
 		Name:      svc.Name,

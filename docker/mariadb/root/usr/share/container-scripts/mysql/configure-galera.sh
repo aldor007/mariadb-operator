@@ -27,7 +27,8 @@ function join {
     local IFS="$1"; shift; echo "$*";
 }
 
-HOSTNAME=$(hostname)
+HOSTNAME=$(echo "$MY_POD_IP" | sed -r 's/\./-/g')
+HOSTNAME=$(echo "$HOSTNAME.$K8S_SC_NAME")
 # Parse out cluster name, from service name:
 CLUSTER_NAME="$(hostname -f | cut -d'.' -f2)"
 
