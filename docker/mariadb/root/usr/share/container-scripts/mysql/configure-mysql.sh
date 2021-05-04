@@ -38,13 +38,14 @@ fi
 --  or products like mysql-fabric won't work
 SET @@SESSION.SQL_LOG_BIN=0;
 
-DELETE FROM mysql.user ;
+DELETE FROM mysql.user WHERE user NOT IN ('mysql.sys', 'mariadb.sys', 'mysqlxsys') OR host NOT IN ('localhost') ;
 CREATE USER 'root'@'%' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}' ;
 GRANT ALL ON *.* TO 'root'@'%' WITH GRANT OPTION ;
 DROP DATABASE IF EXISTS test ;
 FLUSH PRIVILEGES ;
 EOSQL
 
+echo "Use root password"
 # add root password for subsequent calls to mysql
 if [ ! -z "$MYSQL_ROOT_PASSWORD" ]; then
 	mysql+=( -p"${MYSQL_ROOT_PASSWORD}" )
@@ -78,6 +79,8 @@ if ! kill -s TERM "$pid" || ! wait "$pid"; then
 	echo >&2 'MySQL init process failed.'
 	exit 1
 fi
+
+mysql_upgrade -u root -p${MYSQL_ROOT_PASSWORD} || true
 
 echo
 echo 'MySQL init process done. Ready for start up.'

@@ -30,7 +30,6 @@ function join {
 HOSTNAME=$(echo "$MY_POD_IP" | sed -r 's/\./-/g')
 HOSTNAME=$(echo "$HOSTNAME.$K8S_SC_NAME")
 # Parse out cluster name, from service name:
-CLUSTER_NAME="$(hostname -f | cut -d'.' -f2)"
 
 while read -ra LINE; do
     if [[ "${LINE}" == *"${HOSTNAME}"* ]]; then
@@ -44,7 +43,7 @@ if [ "${#PEERS[@]}" = 1 ]; then
 else
     WSREP_CLUSTER_ADDRESS=$(join , "${PEERS[@]}")
 fi
-sed -i -e "s|^wsrep_node_address=.*$|wsrep_node_address=${MY_NAME}|" ${CFG}
+sed -i -e "s|^wsrep_node_address=.*$|wsrep_node_address=${MY_POD_IP}|" ${CFG}
 sed -i -e "s|^wsrep_cluster_name=.*$|wsrep_cluster_name=${CLUSTER_NAME}|" ${CFG}
 sed -i -e "s|^wsrep_cluster_address=.*$|wsrep_cluster_address=gcomm://${WSREP_CLUSTER_ADDRESS}|" ${CFG}
 

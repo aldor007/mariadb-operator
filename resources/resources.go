@@ -84,6 +84,22 @@ func (r *Reconciler) CreateStatefulSet(dbType string) appsv1.StatefulSet {
 							ContainerPort: 3306,
 							Name:          "mariadb",
 						}},
+						ReadinessProbe: &corev1.Probe{
+							Handler: v1.Handler{
+								Exec: &corev1.ExecAction{
+									Command: []string{
+										"/bin/bash",
+										"-c",
+										"/usr/bin/readiness-probe.sh",
+									},
+								},
+							},
+							InitialDelaySeconds: 0,
+							TimeoutSeconds:      20,
+							PeriodSeconds:       10,
+							SuccessThreshold:    5,
+							FailureThreshold:    2,
+						},
 						VolumeMounts: []corev1.VolumeMount{
 							{
 								Name:      dataVolume,
@@ -100,10 +116,30 @@ func (r *Reconciler) CreateStatefulSet(dbType string) appsv1.StatefulSet {
 								Value: headlessSvc,
 							},
 							{
+								Name:  "MYSQL_USER",
+								Value: "operator",
+							},
+							{
+								Name:  "MYSQL_PASSWORD",
+								Value: "operator",
+							},
+							{
+								Name:  "CLUSTER_NAME",
+								Value: r.MariaDBCluster.Name,
+							},
+							{
 								Name: "MY_POD_IP",
 								ValueFrom: &corev1.EnvVarSource{
 									FieldRef: &corev1.ObjectFieldSelector{
 										FieldPath: `status.podIP`,
+									},
+								},
+							},
+							{
+								Name: "MY_POD_NAMESPACE",
+								ValueFrom: &corev1.EnvVarSource{
+									FieldRef: &corev1.ObjectFieldSelector{
+										FieldPath: `metadata.namespace`,
 									},
 								},
 							},

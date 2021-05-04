@@ -70,6 +70,16 @@ func shellOut(sendStdin, script string) {
 	log.Print(string(out))
 }
 
+func extractIps(list []string) []string {
+	result := make([]string, len(list))
+	for i, _ := range list {
+		parts := strings.Split(list[i], ".")
+		result[i] = strings.Replace(parts[0], "-", ".", 3)
+	}
+
+	return result
+}
+
 func main() {
 	flag.Parse()
 
@@ -151,7 +161,7 @@ func main() {
 		peerList := newPeers.List()
 		sort.Strings(peerList)
 		log.Printf("Peer list updated\nwas %v\nnow %v", peers.List(), newPeers.List())
-		shellOut(strings.Join(peerList, "\n"), script)
+		shellOut(strings.Join(extractIps(peerList), "\n"), script)
 		peers = newPeers
 		script = *onChange
 	}
