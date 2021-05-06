@@ -58,6 +58,7 @@ fi
 CREATE USER 'xtrabackup_sst'@'localhost' IDENTIFIED BY 'xtrabackup_sst' ;
 GRANT PROCESS, RELOAD, LOCK TABLES, REPLICATION CLIENT ON *.* TO 'xtrabackup_sst'@'localhost' ;
 CREATE USER 'readinessProbe'@'localhost' IDENTIFIED BY 'readinessProbe';
+FLUSH PRIVILEGES ;
 EOSQL
 
 if [ "$MYSQL_DATABASE" ]; then

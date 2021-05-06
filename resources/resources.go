@@ -76,6 +76,7 @@ func (r *Reconciler) CreateStatefulSet(dbType string) appsv1.StatefulSet {
 					Labels: labels,
 				},
 				Spec: corev1.PodSpec{
+					ServiceAccountName: "mariadb",
 					Containers: []corev1.Container{{
 						Image:           image,
 						ImagePullPolicy: corev1.PullAlways,
@@ -94,7 +95,7 @@ func (r *Reconciler) CreateStatefulSet(dbType string) appsv1.StatefulSet {
 									},
 								},
 							},
-							InitialDelaySeconds: 0,
+							InitialDelaySeconds: 120,
 							TimeoutSeconds:      20,
 							PeriodSeconds:       10,
 							SuccessThreshold:    5,
@@ -122,6 +123,10 @@ func (r *Reconciler) CreateStatefulSet(dbType string) appsv1.StatefulSet {
 							{
 								Name:  "MYSQL_PASSWORD",
 								Value: "operator",
+							},
+							{
+								Name:  "LABEL_SELECTOR",
+								Value: fmt.Sprintf("MariaDB_cr=%s", r.MariaDBCluster.Name),
 							},
 							{
 								Name:  "CLUSTER_NAME",

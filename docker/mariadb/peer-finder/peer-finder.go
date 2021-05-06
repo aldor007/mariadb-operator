@@ -18,47 +18,27 @@ limitations under the License.
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
-	"io/ioutil"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
 	"log"
-	"net"
 	"os"
 	"os/exec"
-	"regexp"
 	"sort"
 	"strings"
 	"time"
 
-	"k8s.io/apimachinery/pkg/util/sets"
-)
-
-const (
-	pollPeriod = 1 * time.Second
+	//
 )
 
 var (
-	onChange   = flag.String("on-change", "", "Script to run on change, must accept a new line separated list of peers via stdin.")
 	onStart    = flag.String("on-start", "", "Script to run on start, must accept a new line separated list of peers via stdin.")
-	svc        = flag.String("service", "", "Governing service responsible for the DNS records of the domain this pod is in.")
 	namespace  = flag.String("ns", "", "The namespace this pod is running in. If unspecified, the POD_NAMESPACE env var is used.")
-	domain     = flag.String("domain", "", "The Cluster Domain which is used by the Cluster, if not set tries to determine it from /etc/resolv.conf file.")
-	myNameArgs = flag.String("my-name", "", "Host name")
+	labelSelector = flag.String("labels", "", "Label selector")
 )
-
-func lookup(svcName string) (sets.String, error) {
-	endpoints := sets.NewString()
-	_, srvRecords, err := net.LookupSRV("", "", svcName)
-	if err != nil {
-		return endpoints, err
-	}
-	for _, srvRecord := range srvRecords {
-		// The SRV records ends in a "." for the root domain
-		ep := fmt.Sprintf("%v", srvRecord.Target[:len(srvRecord.Target)-1])
-		endpoints.Insert(ep)
-	}
-	return endpoints, nil
-}
 
 func shellOut(sendStdin, script string) {
 	log.Printf("execing: %v with stdin: %v", script, sendStdin)
@@ -87,84 +67,51 @@ func main() {
 	if ns == "" {
 		ns = os.Getenv("NAMESPACE")
 	}
-	hostname, err := os.Hostname()
-	if err != nil {
-		log.Fatalf("Failed to get hostname: %s", err)
-	}
-	var domainName string
+	script := *onStart
 
-	// If domain is not provided, try to get it from resolv.conf
-	if *domain == "" {
-		resolvConfBytes, err := ioutil.ReadFile("/etc/resolv.conf")
-		resolvConf := string(resolvConfBytes)
-		if err != nil {
-			log.Fatal("Unable to read /etc/resolv.conf")
-		}
-
-		var re *regexp.Regexp
-		if ns == "" {
-			// Looking for a domain that looks like with *.svc.**
-			re, err = regexp.Compile(`\A(.*\n)*search\s{1,}(.*\s{1,})*(?P<goal>[a-zA-Z0-9-]{1,63}.svc.([a-zA-Z0-9-]{1,63}\.)*[a-zA-Z0-9]{2,63})`)
-		} else {
-			// Looking for a domain that looks like svc.**
-			re, err = regexp.Compile(`\A(.*\n)*search\s{1,}(.*\s{1,})*(?P<goal>svc.([a-zA-Z0-9-]{1,63}\.)*[a-zA-Z0-9]{2,63})`)
-		}
-		if err != nil {
-			log.Fatalf("Failed to create regular expression: %v", err)
-		}
-
-		groupNames := re.SubexpNames()
-		result := re.FindStringSubmatch(resolvConf)
-		for k, v := range result {
-			if groupNames[k] == "goal" {
-				if ns == "" {
-					// Domain is complete if ns is empty
-					domainName = v
-				} else {
-					// Need to convert svc.** into ns.svc.**
-					domainName = ns + "." + v
-				}
-				break
-			}
-		}
-		log.Printf("Determined Domain to be %s", domainName)
-
-	} else {
-		domainName = strings.Join([]string{ns, "svc", *domain}, ".")
-	}
-
-	if *svc == "" || domainName == "" || (*onChange == "" && *onStart == "") {
+	if ns == "" && labelSelector == nil ||  *onStart == "" {
 		log.Fatalf("Incomplete args, require -on-change and/or -on-start, -service and -ns or an env var for POD_NAMESPACE.")
 	}
-
-	myName := ""
-	if myNameArgs == nil {
-		myName = strings.Join([]string{hostname, *svc, domainName}, ".")
-	} else {
-		myName = *myNameArgs
+	config, err := rest.InClusterConfig()
+	if err != nil {
+		panic(err.Error())
 	}
-	script := *onStart
-	if script == "" {
-		script = *onChange
-		log.Printf("No on-start supplied, on-change %v will be applied on start.", script)
+	// creates the clientset
+	clientset, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		panic(err.Error())
 	}
-	for newPeers, peers := sets.NewString(), sets.NewString(); script != ""; time.Sleep(pollPeriod) {
-		newPeers, err = lookup(*svc)
+	// get pods in all the namespaces by omitting namespace
+	// Or specify namespace to get pods in particular namespace
+	log.Printf("Using ns %s labels %s", ns, *labelSelector)
+	peerList := make([]string, 0)
+	emptyIp := true
+	for emptyIp  {
+		pods, err := clientset.CoreV1().Pods(ns).List(context.TODO(), metav1.ListOptions{
+			LabelSelector: *labelSelector,
+		})
+		log.Printf("PODs len %d \n", len(pods.Items))
 		if err != nil {
-			log.Printf("%v", err)
-			continue
+			panic(err.Error())
 		}
-		if newPeers.Equal(peers) || !newPeers.Has(myName) {
-			log.Printf("Have not found myself in list yet.\nMy Hostname: %s\nHosts in list: %s", myName, strings.Join(newPeers.List(), ", "))
-			continue
+		for _, pod := range pods.Items {
+			if pod.Status.PodIP == "" {
+				log.Printf("POD IP is empty\n")
+			} else {
+				peerList = append(peerList, pod.Status.PodIP)
+				emptyIp = false
+			}
 		}
-		peerList := newPeers.List()
-		sort.Strings(peerList)
-		log.Printf("Peer list updated\nwas %v\nnow %v", peers.List(), newPeers.List())
-		shellOut(strings.Join(extractIps(peerList), "\n"), script)
-		peers = newPeers
-		script = *onChange
+		time.Sleep(10*time.Second)
 	}
-	// TODO: Exit if there's no on-change?
+
+	if len(peerList) == 0 {
+		log.Printf("List is empty")
+		panic("list should not be empty")
+	}
+
+	sort.Strings(peerList)
+	log.Printf("Peer list updated was %v len %d \n", peerList, len(peerList))
+	shellOut(strings.Join(peerList, "\n"), script)
 	log.Printf("Peer finder exiting")
 }

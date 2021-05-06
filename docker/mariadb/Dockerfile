@@ -27,7 +27,7 @@ RUN apt update \
   && apt install -y -qq \
     software-properties-common \
   && apt-key adv --fetch-keys 'https://mariadb.org/mariadb_release_signing_key.asc' \
-  && add-apt-repository 'deb [arch=amd64,arm64,ppc64el] https://ftp.icm.edu.pl/pub/unix/database/mariadb/repo/10.6/ubuntu focal main' \
+  && add-apt-repository 'deb [arch=amd64,arm64,ppc64el] https://ftp.icm.edu.pl/pub/unix/database/mariadb/repo/10.5/ubuntu focal main' \
   && apt update \
   && apt install -y -qq \
     dnsutils \
