@@ -1,13 +1,13 @@
-# permissions for end users to view mariadbclusters.
+# permissions for end users to view MariaDBClusters.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: mariadbcluster-viewer-role
+  name: MariaDBCluster-viewer-role
 rules:
 - apiGroups:
   - mariadb.mariadb.org
   resources:
-  - mariadbclusters
+  - MariaDBClusters
   verbs:
   - get
   - list
@@ -15,6 +15,6 @@ rules:
 - apiGroups:
   - mariadb.mariadb.org
   resources:
-  - mariadbclusters/status
+  - MariaDBClusters/status
   verbs:
   - get

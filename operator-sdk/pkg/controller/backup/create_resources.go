@@ -59,7 +59,7 @@ func (r *ReconcileBackup) createCronJob(bkp *v1alpha1.Backup, db *v1alpha1.Maria
 
 // getMariaBkpPV - Check if the PV is created, if not create one
 func (r *ReconcileBackup) createBackupPV(bkp *v1alpha1.Backup, db *v1alpha1.MariaDB) error {
-	pvName := resource.GetMariadbBkpVolumeName(bkp)
+	pvName := resource.GetMariaDBBkpVolumeName(bkp)
 	pv, err := service.FetchPVByName(pvName, r.client)
 	if err != nil || pv == nil {
 		pv := resource.NewDbBackupPV(bkp, db, r.scheme)
@@ -73,7 +73,7 @@ func (r *ReconcileBackup) createBackupPV(bkp *v1alpha1.Backup, db *v1alpha1.Mari
 
 // createBackupPVC - Check if the PVC is created, if not create one
 func (r *ReconcileBackup) createBackupPVC(bkp *v1alpha1.Backup, db *v1alpha1.MariaDB) error {
-	pvcName := resource.GetMariadbBkpVolumeClaimName(bkp)
+	pvcName := resource.GetMariaDBBkpVolumeClaimName(bkp)
 	pvc, err := service.FetchPVCByNameAndNS(pvcName, bkp.Namespace, r.client)
 	if err != nil || pvc == nil {
 		pvc := resource.NewDbBackupPVC(bkp, db, r.scheme)

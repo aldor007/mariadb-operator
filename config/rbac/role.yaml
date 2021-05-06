@@ -7,9 +7,9 @@ metadata:
   name: manager-role
 rules:
 - apiGroups:
-  - mariadb.mariadb.org
+  - mariadb.mkaciuba.com
   resources:
-  - mariadbclusters
+  - MariaDBClusters
   verbs:
   - create
   - delete
@@ -19,15 +19,93 @@ rules:
   - update
   - watch
 - apiGroups:
-  - mariadb.mariadb.org
+  - mariadb.mkaciuba.com
   resources:
-  - mariadbclusters/finalizers
+  - MariaDBClusters/finalizers
   verbs:
   - update
 - apiGroups:
-  - mariadb.mariadb.org
+  - mariadb.mkaciuba.com
   resources:
-  - mariadbclusters/status
+  - MariaDBClusters/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - mariadb.mkaciuba.com
+  resources:
+  - mariadbbackups
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - mariadb.mkaciuba.com
+  resources:
+  - mariadbbackups/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - mariadb.mkaciuba.com
+  resources:
+  - mariadbbackups/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - mariadb.mkaciuba.com
+  resources:
+  - mariadbdatabases
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - mariadb.mkaciuba.com
+  resources:
+  - mariadbdatabases/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - mariadb.mkaciuba.com
+  resources:
+  - mariadbdatabases/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - mariadb.mkaciuba.com
+  resources:
+  - mariadbusers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - mariadb.mkaciuba.com
+  resources:
+  - mariadbusers/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - mariadb.mkaciuba.com
+  resources:
+  - mariadbusers/status
   verbs:
   - get
   - patch

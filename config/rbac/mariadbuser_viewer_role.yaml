@@ -1,24 +1,20 @@
-# permissions for end users to edit MariaDBClusters.
+# permissions for end users to view mariadbusers.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: MariaDBCluster-editor-role
+  name: mariadbuser-viewer-role
 rules:
 - apiGroups:
   - mariadb.mariadb.org
   resources:
-  - MariaDBClusters
+  - mariadbusers
   verbs:
-  - create
-  - delete
   - get
   - list
-  - patch
-  - update
   - watch
 - apiGroups:
   - mariadb.mariadb.org
   resources:
-  - MariaDBClusters/status
+  - mariadbusers/status
   verbs:
   - get

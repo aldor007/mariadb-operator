@@ -1,0 +1,7 @@
+apiVersion: mariadb.mkaciuba.com/v1alpha1
+kind: MariaDBDatabase
+metadata:
+  name: mariadbdatabase-sample
+spec:
+  # Add fields here
+  foo: bar

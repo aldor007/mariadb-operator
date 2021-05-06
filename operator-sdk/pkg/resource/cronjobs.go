@@ -20,7 +20,7 @@ const pvStorageName = "mariadb-bkp-pv-storage"
 // NewBackupCronJob Returns the CronJob object for the Database Backup
 func NewBackupCronJob(bkp *v1alpha1.Backup, db *v1alpha1.MariaDB, scheme *runtime.Scheme) *v1beta1.CronJob {
 
-	bkpPVClaimName := GetMariadbBkpVolumeClaimName(bkp)
+	bkpPVClaimName := GetMariaDBBkpVolumeClaimName(bkp)
 	dbPort := db.Spec.Port
 
 	hostname := mariadbBkpServiceName(bkp) + "." + bkp.Namespace

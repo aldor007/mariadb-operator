@@ -31,7 +31,7 @@ type Reconciler struct {
 
 func (r *Reconciler) CreateStatefulSet(dbType string) appsv1.StatefulSet {
 	labels := utils.Labels(r.MariaDBCluster)
-	labels["type.mariadb.org"] = dbType
+	labels["mariadb/type"] = dbType
 	size := r.MariaDBCluster.Spec.PrimaryCount
 	image := r.MariaDBCluster.Spec.Image
 
@@ -204,7 +204,7 @@ func (r *Reconciler) createPVC() corev1.PersistentVolumeClaim {
 
 func (r *Reconciler) CreateService(dbType string) corev1.Service {
 	labels := utils.Labels(r.MariaDBCluster)
-	labels["type.mariadb.org"] = dbType
+	labels["mariadb/type"] = dbType
 
 	s := corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
@@ -228,7 +228,7 @@ func (r *Reconciler) CreateService(dbType string) corev1.Service {
 }
 func (r *Reconciler) CreateHeadlessService(dbType string) corev1.Service {
 	labels := utils.Labels(r.MariaDBCluster)
-	labels["type.mariadb.org"] = dbType
+	labels["mariadb/type"] = dbType
 
 	s := corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{

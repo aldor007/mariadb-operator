@@ -1,7 +1,7 @@
-apiVersion: mariadb.mariadb.org/v1alpha1
+apiVersion: mariadb.mkaciuba.com/v1alpha1
 kind: MariaDBCluster
 metadata:
-  name: mariadbcluster-sample
+  name: cluster-sample
 spec:
   primaryCount: 2
   dataStorageSize: 1G

@@ -24,13 +24,13 @@ func GetMariadbVolumeClaimName(v *v1alpha1.MariaDB) string {
 	return v.Name + "-pv-claim"
 }
 
-// GetMariadbBkpVolumeName - return name of PV used in DB Backup
-func GetMariadbBkpVolumeName(bkp *v1alpha1.Backup) string {
+// GetMariaDBBkpVolumeName - return name of PV used in DB Backup
+func GetMariaDBBkpVolumeName(bkp *v1alpha1.Backup) string {
 	return bkp.Name + "-" + bkp.Namespace + "-pv"
 }
 
-// GetMariadbBkpVolumeClaimName - return name of PVC used in DB Backup
-func GetMariadbBkpVolumeClaimName(bkp *v1alpha1.Backup) string {
+// GetMariaDBBkpVolumeClaimName - return name of PVC used in DB Backup
+func GetMariaDBBkpVolumeClaimName(bkp *v1alpha1.Backup) string {
 	return bkp.Name + "-pv-claim"
 }
 
@@ -40,7 +40,7 @@ func NewDbBackupPV(bkp *v1alpha1.Backup, v *v1alpha1.MariaDB, scheme *runtime.Sc
 	labels := utils.MariaDBBkpLabels(bkp, "mariadb-backup")
 	pv := &corev1.PersistentVolume{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: GetMariadbBkpVolumeName(bkp),
+			Name: GetMariaDBBkpVolumeName(bkp),
 			// Namespace: v.Namespace,
 			Labels: labels,
 		},
@@ -69,7 +69,7 @@ func NewDbBackupPVC(bkp *v1alpha1.Backup, v *v1alpha1.MariaDB, scheme *runtime.S
 	storageClassName := "manual"
 	pvc := &corev1.PersistentVolumeClaim{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      GetMariadbBkpVolumeClaimName(bkp),
+			Name:      GetMariaDBBkpVolumeClaimName(bkp),
 			Namespace: v.Namespace,
 			Labels:    labels,
 		},
@@ -81,7 +81,7 @@ func NewDbBackupPVC(bkp *v1alpha1.Backup, v *v1alpha1.MariaDB, scheme *runtime.S
 					corev1.ResourceName(corev1.ResourceStorage): resource.MustParse(bkp.Spec.BackupSize),
 				},
 			},
-			VolumeName: GetMariadbBkpVolumeName(bkp),
+			VolumeName: GetMariaDBBkpVolumeName(bkp),
 		},
 	}
 

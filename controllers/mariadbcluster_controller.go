@@ -42,9 +42,9 @@ type MariaDBClusterReconciler struct {
 	Scheme       *runtime.Scheme
 }
 
-//+kubebuilder:rbac:groups=mariadb.mariadb.org,resources=mariadbclusters,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=mariadb.mariadb.org,resources=mariadbclusters/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=mariadb.mariadb.org,resources=mariadbclusters/finalizers,verbs=update
+//+kubebuilder:rbac:groups=mariadb.mkaciuba.com,resources=MariaDBClusters,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=mariadb.mkaciuba.com,resources=MariaDBClusters/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=mariadb.mkaciuba.com,resources=MariaDBClusters/finalizers,verbs=update
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.

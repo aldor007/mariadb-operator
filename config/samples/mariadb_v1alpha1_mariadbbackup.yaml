@@ -1,0 +1,7 @@
+apiVersion: mariadb.mkaciuba.com/v1alpha1
+kind: MariaDBBackup
+metadata:
+  name: mariadbbackup-sample
+spec:
+  # Add fields here
+  foo: bar

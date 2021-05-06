@@ -24,6 +24,11 @@ import (
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
+type ClusterReference struct {
+	corev1.LocalObjectReference `json:",inline"`
+	// Namespace the MySQL cluster namespace
+	Namespace string `json:"namespace,omitempty"`
+}
 
 // MariaDBClusterSpec defines the desired state of MariaDBCluster
 type MariaDBClusterSpec struct {
@@ -54,7 +59,7 @@ type MariaDBClusterSpec struct {
 
 	// A map[string]string that will be passed to my.cnf file.
 	// +optional
-	MariaDBConf MariaDBConf `json:"mariaDBConf,omitempty"`
+	MariaDBConf MariaDBConf `json:"MariaDBConf,omitempty"`
 }
 
 // MariaDBConf defines type for extra cluster configs. It's a simple map between
@@ -71,7 +76,7 @@ type MariaDBClusterStatus struct {
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
 
-// MariaDBCluster is the Schema for the mariadbclusters API
+// MariaDBCluster is the Schema for the MariaDBClusters API
 type MariaDBCluster struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`

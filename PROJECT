@@ -1,4 +1,4 @@
-domain: mariadb.org
+domain: mkaciuba.com
 layout:
 - go.kubebuilder.io/v3
 projectName: mariadb-operator
@@ -8,9 +8,36 @@ resources:
     crdVersion: v1
     namespaced: true
   controller: true
-  domain: mariadb.org
+  domain: mkaciuba.com
   group: mariadb
   kind: MariaDBCluster
+  path: github.com/aldor007/mariadb-operator/api/v1alpha1
+  version: v1alpha1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: mkaciuba.com
+  group: mariadb
+  kind: MariaDBUser
+  path: github.com/aldor007/mariadb-operator/api/v1alpha1
+  version: v1alpha1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: mkaciuba.com
+  group: mariadb
+  kind: MariaDBDatabase
+  path: github.com/aldor007/mariadb-operator/api/v1alpha1
+  version: v1alpha1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: mkaciuba.com
+  group: mariadb
+  kind: MariaDBBackup
   path: github.com/aldor007/mariadb-operator/api/v1alpha1
   version: v1alpha1
 version: "3"

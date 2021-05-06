@@ -2,7 +2,7 @@
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
-  name: mariadbclusters.mariadb.mariadb.org
+  name: MariaDBClusters.mariadb.mariadb.org
 spec:
   conversion:
     strategy: Webhook

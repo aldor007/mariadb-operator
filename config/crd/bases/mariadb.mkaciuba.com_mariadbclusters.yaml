@@ -6,9 +6,9 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.4.1
   creationTimestamp: null
-  name: mariadbclusters.mariadb.mariadb.org
+  name: mariadbclusters.mariadb.mkaciuba.com
 spec:
-  group: mariadb.mariadb.org
+  group: mariadb.mkaciuba.com
   names:
     kind: MariaDBCluster
     listKind: MariaDBClusterList
@@ -19,7 +19,7 @@ spec:
   - name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: MariaDBCluster is the Schema for the mariadbclusters API
+        description: MariaDBCluster is the Schema for the MariaDBClusters API
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -36,6 +36,14 @@ spec:
           spec:
             description: MariaDBClusterSpec defines the desired state of MariaDBCluster
             properties:
+              MariaDBConf:
+                additionalProperties:
+                  anyOf:
+                  - type: integer
+                  - type: string
+                  x-kubernetes-int-or-string: true
+                description: A map[string]string that will be passed to my.cnf file.
+                type: object
               dataStorageSize:
                 description: Database storage Size (Ex. 1Gi, 100Mi)
                 type: string
@@ -47,14 +55,6 @@ spec:
                 description: A bucket URL that contains a xtrabackup to initialize
                   the mysql database.
                 type: string
-              mariaDBConf:
-                additionalProperties:
-                  anyOf:
-                  - type: integer
-                  - type: string
-                  x-kubernetes-int-or-string: true
-                description: A map[string]string that will be passed to my.cnf file.
-                type: object
               primaryCount:
                 description: PrimartCount number of master pods
                 format: int32

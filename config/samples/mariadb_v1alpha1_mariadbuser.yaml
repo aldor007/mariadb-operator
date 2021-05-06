@@ -1,0 +1,7 @@
+apiVersion: mariadb.mkaciuba.com/v1alpha1
+kind: MariaDBUser
+metadata:
+  name: mariadbuser-sample
+spec:
+  # Add fields here
+  foo: bar
