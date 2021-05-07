@@ -28,7 +28,6 @@ function join {
 }
 
 HOSTNAME=$(echo "$MY_POD_IP" | sed -r 's/\./-/g')
-HOSTNAME=$(echo "$HOSTNAME.$K8S_SC_NAME")
 # Parse out cluster name, from service name:
 
 while read -ra LINE; do

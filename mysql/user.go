@@ -1,4 +1,3 @@
-
 package mysql
 
 import (
@@ -6,16 +5,13 @@ import (
 	"errors"
 	"fmt"
 	mariadbv1alpha1 "github.com/aldor007/mariadb-operator/api/v1alpha1"
-	corev1 "k8s.io/api/core/v1"
 	"strings"
-
 )
 
 // CreateUserIfNotExists creates a user if it doesn't already exist and it gives it the specified permissions
 func CreateUserIfNotExists(ctx context.Context, sql SQLRunner,
 	user, pass string, allowedHosts []string, permissions []mariadbv1alpha1.MariaDBPermission,
-	resourceLimit mariadbv1alpha1.MariaDBUserLimits
-) error {
+	resourceLimit mariadbv1alpha1.MariaDBUserLimits) error {
 
 	// throw error if there are no allowed hosts
 	if len(allowedHosts) == 0 {

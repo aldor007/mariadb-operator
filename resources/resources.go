@@ -39,7 +39,6 @@ func (r *Reconciler) CreateStatefulSet(dbType string) appsv1.StatefulSet {
 		SecretKeyRef: &r.MariaDBCluster.Spec.RootPassword,
 	}
 
-	headlessSvc := fmt.Sprintf("mariadb-headless-%s-%s", r.MariaDBCluster.Name, dbType)
 	dataVolume := fmt.Sprintf("data-%s", dbType)
 	statefulset := appsv1.StatefulSet{
 		ObjectMeta: metav1.ObjectMeta{
@@ -79,7 +78,7 @@ func (r *Reconciler) CreateStatefulSet(dbType string) appsv1.StatefulSet {
 					ServiceAccountName: "mariadb",
 					Containers: []corev1.Container{{
 						Image:           image,
-						ImagePullPolicy: corev1.PullAlways,
+						ImagePullPolicy: corev1.PullIfNotPresent,
 						Name:            "mariadb-service",
 						Ports: []corev1.ContainerPort{{
 							ContainerPort: 3306,
@@ -113,20 +112,12 @@ func (r *Reconciler) CreateStatefulSet(dbType string) appsv1.StatefulSet {
 								ValueFrom: rootPasswordSecret,
 							},
 							{
-								Name:  "K8S_SVC_NAME",
-								Value: headlessSvc,
-							},
-							{
-								Name:  "MYSQL_USER",
-								Value: "operator",
-							},
-							{
-								Name:  "MYSQL_PASSWORD",
-								Value: "operator",
-							},
-							{
 								Name:  "LABEL_SELECTOR",
 								Value: fmt.Sprintf("MariaDB_cr=%s", r.MariaDBCluster.Name),
+							},
+							{
+								Name:  "GALLERA_MODE",
+								Value: "yes",
 							},
 							{
 								Name:  "CLUSTER_NAME",

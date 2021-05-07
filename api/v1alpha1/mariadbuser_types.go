@@ -20,6 +20,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"time"
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
@@ -58,7 +59,7 @@ type MariaDBUserLimits struct {
 	MaxStatementTime      int `json:"MAX_STATEMENT_TIME"`
 }
 
-func (l MariaDBUserLimits) Get() map[string]int  {
+func (l MariaDBUserLimits) Get() map[string]int {
 	result := make(map[string]int)
 	if l.MaxConnectionsPerHour != 0 {
 		result["MAX_CONNECTIONS_PER_HOUR"] = l.MaxConnectionsPerHour
@@ -90,11 +91,9 @@ type MariaDBPermission struct {
 }
 type MariaDBUserCondition struct {
 	// Status of the condition, one of True, False, Unknown.
-	Status corev1.ConditionStatus `json:"status"`
+	Status MariaDBStatusType `json:"status"`
 	// The last time this condition was updated.
 	LastUpdateTime metav1.Time `json:"lastUpdateTime,omitempty"`
-	// Last time the condition transitioned from one status to another.
-	LastTransitionTime metav1.Time `json:"lastTransitionTime"`
 	// The reason for the condition's last transition.
 	Reason string `json:"reason"`
 	// A human readable message indicating details about the transition.
@@ -105,7 +104,7 @@ type MariaDBUserCondition struct {
 type MariaDBUserStatus struct {
 	// Conditions represents the MysqlUser resource conditions list.
 	// +optional
-	Conditions []MariaDBUserCondition `json:"conditions,omitempty"`
+	Condition MariaDBUserCondition `json:"conditions,omitempty"`
 
 	// AllowedHosts contains the list of hosts that the user is allowed to connect from.
 	AllowedHosts []string `json:"allowedHosts,omitempty"`
@@ -139,8 +138,11 @@ func (u *MariaDBUser) GetClusterKey() client.ObjectKey {
 	}
 }
 
-func (u *MariaDBUser) UpdateStatus()  {
-
+func (u *MariaDBUser) UpdateStatusCondition(status MariaDBStatusType, reason string, message string) {
+	u.Status.Condition.Status = status
+	u.Status.Condition.LastUpdateTime = metav1.NewTime(time.Now())
+	u.Status.Condition.Reason = reason
+	u.Status.Condition.Message = message
 }
 
 //+kubebuilder:object:root=true

@@ -3,5 +3,17 @@ kind: MariaDBUser
 metadata:
   name: mariadbuser-sample
 spec:
-  # Add fields here
-  foo: bar
+  clusterRef:
+    name: cluster-sample
+    namespace: default
+  user: mariadb-user
+  password:
+    name: mariadb-sample-root
+    key: password
+  allowedHosts:
+    - "%"
+  permissions:
+    - schema: mariadb-test
+      tables: [ "*" ]
+      permissions:
+        - ALL

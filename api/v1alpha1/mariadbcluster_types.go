@@ -94,6 +94,14 @@ func (c *MariaDBCluster) GetPrimarySvc() string {
 	return fmt.Sprintf("mariadb-%s-%s", c.Name, "primary")
 }
 
+func (c *MariaDBCluster) GetPrimaryHeadlessAddress() string {
+	return fmt.Sprintf("%s.%s", c.GetPrimaryHeadlessSvc(), c.Namespace)
+}
+
+func (c *MariaDBCluster) GetPrimaryHeadlessSvc() string {
+	return fmt.Sprintf("mariadb-headless-%s-%s", c.Name, "primary")
+}
+
 //+kubebuilder:object:root=true
 
 // MariaDBClusterList contains a list of MariaDBCluster

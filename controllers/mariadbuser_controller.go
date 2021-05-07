@@ -23,6 +23,7 @@ import (
 	"github.com/aldor007/mariadb-operator/utils"
 	corev1 "k8s.io/api/core/v1"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
+	"reflect"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"time"
 
@@ -33,9 +34,11 @@ import (
 
 	mariadbv1alpha1 "github.com/aldor007/mariadb-operator/api/v1alpha1"
 )
+
 const (
-	userFinalizer =  "mariadb-operator.mkaciuba.com/user"
+	userFinalizer = "mariadb-operator.mkaciuba.com/user"
 )
+
 // MariaDBUserReconciler reconciles a MariaDBUser object
 type MariaDBUserReconciler struct {
 	client.Client
@@ -62,23 +65,29 @@ func (r *MariaDBUserReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	user := &mariadbv1alpha1.MariaDBUser{}
 	err := r.Get(ctx, req.NamespacedName, user)
 	if err != nil {
-	if apiErrors.IsNotFound(err) {
-	// Object not found, return. Created objects are automatically garbage collected.
-	// For additional cleanup logic use finalizers.
-	return reconcile.Result{}, nil
-	}
-	// Error reading the object - requeue the request.
-	return reconcile.Result{}, err
+		if apiErrors.IsNotFound(err) {
+			// Object not found, return. Created objects are automatically garbage collected.
+			// For additional cleanup logic use finalizers.
+			return reconcile.Result{}, nil
+		}
+		// Error reading the object - requeue the request.
+		return reconcile.Result{}, err
 	}
 
 	// if the user has been deleted then remove it from mysql cluster
 	if !user.ObjectMeta.DeletionTimestamp.IsZero() {
-	return reconcile.Result{}, r.removeUser(ctx, user, log)
+		return reconcile.Result{}, r.removeUser(ctx, user, log)
 	}
 
-	 r.createUser(ctx, user, log)
-	// enqueue the resource again after to keep the resource up to date in mysql
-	// in case is changed directly into mysql
+	err = r.createUser(ctx, user, log)
+	if err != nil {
+		errUpdate := r.Update(ctx, user)
+		if errUpdate != nil {
+			log.Error(errUpdate, "error updating status")
+		}
+		return ctrl.Result{}, err
+	}
+
 	return reconcile.Result{
 		Requeue:      true,
 		RequeueAfter: 2 * time.Minute,
@@ -113,7 +122,7 @@ func (r *MariaDBUserReconciler) dropUserFromDB(ctx context.Context, user *mariad
 	}
 
 	for _, host := range user.Status.AllowedHosts {
-		log.Info("removing user from mysql cluster",  "username", user.Spec.User, "cluster", user.GetClusterKey())
+		log.Info("removing user from mysql cluster", "username", user.Spec.User, "cluster", user.GetClusterKey())
 		if err := mysql.DropUser(ctx, sql, user.Spec.User, host); err != nil {
 			return err
 		}
@@ -141,7 +150,7 @@ func (r *MariaDBUserReconciler) reconcileUserInDB(ctx context.Context, user *mar
 	}
 
 	// create/ update user in database
-	log.Info("creating mysql user",  "username", user.Spec.User, "cluster", user.GetClusterKey())
+	log.Info("creating mysql user", "username", user.Spec.User, "cluster", user.GetClusterKey())
 	if err := mysql.CreateUserIfNotExists(ctx, sql, user.Spec.User, password, user.Spec.AllowedHosts,
 		user.Spec.Permissions, user.Spec.ResourceLimits); err != nil {
 		return err
@@ -157,12 +166,12 @@ func (r *MariaDBUserReconciler) reconcileUserInDB(ctx context.Context, user *mar
 
 	return nil
 }
-func (r *MariaDBUserReconciler) creatUser(ctx context.Context, user *mariadbv1alpha1.MariaDBUser, log logr.Logger) (err error) {
-	// catch the error and set the failed status
-	defer setFailedStatus(&err, user)
+
+func (r *MariaDBUserReconciler) createUser(ctx context.Context, user *mariadbv1alpha1.MariaDBUser, log logr.Logger) (err error) {
 
 	// Reconcile the user into mysql
-	if err = r.reconcileUserInDB(ctx, user); err != nil {
+	if err = r.reconcileUserInDB(ctx, user, log); err != nil {
+		user.UpdateStatusCondition(mariadbv1alpha1.MariaDBStatusError, "create user in db", err.Error())
 		return
 	}
 
@@ -180,14 +189,10 @@ func (r *MariaDBUserReconciler) creatUser(ctx context.Context, user *mariadbv1al
 	}
 
 	// Update the status according to the result
-	user.UpdateStatusCondition(
-		mysqlv1alpha1.MySQLUserReady, corev1.ConditionTrue,
-		mysqluser.ProvisionSucceededReason, "The user provisioning has succeeded.",
-	)
+	user.UpdateStatusCondition(mariadbv1alpha1.MariaDBStatusReady, "user created", "The user provisioning has succeeded.")
 
 	return
 }
-
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *MariaDBUserReconciler) SetupWithManager(mgr ctrl.Manager) error {

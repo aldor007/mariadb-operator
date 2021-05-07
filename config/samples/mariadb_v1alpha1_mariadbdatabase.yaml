@@ -3,5 +3,7 @@ kind: MariaDBDatabase
 metadata:
   name: mariadbdatabase-sample
 spec:
-  # Add fields here
-  foo: bar
+  clusterRef:
+    name: cluster-sample
+    namespace: default
+  database: mariadb-test
