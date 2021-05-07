@@ -3,6 +3,7 @@ package mysql
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 
@@ -36,11 +37,13 @@ func NewConfigFromClusterKey(ctx context.Context, c client.Client, clusterKey cl
 	if err := c.Get(ctx, secretKey, secret); err != nil {
 		return nil, err
 	}
-
+	if _, ok := secret.Data[cluster.Spec.RootPassword.Key]; !ok {
+		return nil, errors.New("missing key in password secret")
+	}
 	return &Config{
 		User:     "root",
 		Password: string(secret.Data[cluster.Spec.RootPassword.Key]),
-		Host:     fmt.Sprintf("%s-mysql-master.%s", cluster.Name, cluster.Namespace),
+		Host:     cluster.GetPrimaryAddress(),
 		Port:     3306,
 	}, nil
 }
@@ -76,26 +79,26 @@ type SQLRunnerFactory func(cfg *Config, errs ...error) (SQLRunner, func(), error
 // NewSQLRunner opens a connections using the given DSN
 func NewSQLRunner(cfg *Config, errs ...error) (SQLRunner, func(), error) {
 	var db *sql.DB
-	var close func()
+	var closeFn func()
 
 	// make this factory accept a functions that tries to generate a config
 	if len(errs) > 0 && errs[0] != nil {
-		return nil, close, errs[0]
+		return nil, closeFn, errs[0]
 	}
 
 	db, err := sql.Open("mysql", cfg.GetMysqlDSN())
 	if err != nil {
-		return nil, close, err
+		return nil, closeFn, err
 	}
 
 	// close connection function
-	close = func() {
+	closeFn = func() {
 		if cErr := db.Close(); cErr != nil {
 			log.Error(cErr, "failed closing the database connection")
 		}
 	}
 
-	return &sqlRunner{db: db}, close, nil
+	return &sqlRunner{db: db}, closeFn, nil
 }
 
 func (sr sqlRunner) QueryExec(ctx context.Context, query Query) error {

@@ -5,7 +5,7 @@ metadata:
 spec:
   primaryCount: 2
   dataStorageSize: 1G
-  image: "ghcr.io/aldor007/mariadb-galera:1.0.3-16"
+  image: "ghcr.io/aldor007/mariadb-galera:1.0.3-17"
   storageClass: nfs-cubie2
   rootPassword:
     name: mariadb-sample-root

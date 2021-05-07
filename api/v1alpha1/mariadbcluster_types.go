@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"fmt"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
@@ -83,6 +84,14 @@ type MariaDBCluster struct {
 
 	Spec   MariaDBClusterSpec   `json:"spec,omitempty"`
 	Status MariaDBClusterStatus `json:"status,omitempty"`
+}
+
+func (c *MariaDBCluster) GetPrimaryAddress() string {
+	return fmt.Sprintf("%s.%s", c.GetPrimarySvc(), c.Namespace)
+}
+
+func (c *MariaDBCluster) GetPrimarySvc() string {
+	return fmt.Sprintf("mariadb-%s-%s", c.Name, "primary")
 }
 
 //+kubebuilder:object:root=true

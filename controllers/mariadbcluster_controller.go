@@ -20,8 +20,6 @@ import (
 	"context"
 	"github.com/aldor007/mariadb-operator/resources"
 	"github.com/aldor007/mariadb-operator/resources/primary"
-	"github.com/aldor007/mariadb-operator/resources/replica"
-
 	"github.com/go-logr/logr"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -70,7 +68,6 @@ func (r *MariaDBClusterReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 	}
 	reconcilers := []resources.ComponentReconciler{
 		primary.NewPrimary(r.Client, r.DirectClient, r.Scheme, instance),
-		replica.NewReplica(r.Client, r.DirectClient, r.Scheme, instance),
 	}
 
 	for _, rec := range reconcilers {

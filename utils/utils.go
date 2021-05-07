@@ -55,3 +55,24 @@ func removeString(slice []string, s string) []string {
 
 	return result
 }
+
+func StringDiffIn(actual, desired []string) []string {
+	diff := []string{}
+	for _, str := range actual {
+		// if is not in the desired list remove it
+		if _, exists := StringIn(str, desired); !exists {
+			diff = append(diff, str)
+		}
+	}
+
+	return diff
+}
+
+func StringIn(str string, strs []string) (int, bool) {
+	for i, s := range strs {
+		if s == str {
+			return i, true
+		}
+	}
+	return 0, false
+}

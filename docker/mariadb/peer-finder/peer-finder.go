@@ -94,13 +94,17 @@ func main() {
 		if err != nil {
 			panic(err.Error())
 		}
+		counterIps := 0
 		for _, pod := range pods.Items {
 			if pod.Status.PodIP == "" {
 				log.Printf("POD IP is empty\n")
 			} else {
 				peerList = append(peerList, pod.Status.PodIP)
-				emptyIp = false
+				counterIps = counterIps + 1
 			}
+		}
+		if counterIps == len(pods.Items) {
+			emptyIp = false
 		}
 		time.Sleep(10*time.Second)
 	}

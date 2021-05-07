@@ -208,7 +208,7 @@ func (r *Reconciler) CreateService(dbType string) corev1.Service {
 
 	s := corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprintf("mariadb-%s-%s", r.MariaDBCluster.Name, dbType),
+			Name:      r.MariaDBCluster.GetPrimarySvc(),
 			Namespace: r.MariaDBCluster.Namespace,
 			Labels:    labels,
 		},

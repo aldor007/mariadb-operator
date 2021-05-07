@@ -104,7 +104,6 @@ func (r *MariaDBDatabaseReconciler) deleteDatabase(ctx context.Context, db *mari
 	log.Info("deleting MySQL database", "name", db.Name, "database", db.Spec.Database)
 
 	sql, closeConn, err := r.SQLRunnerFactory(mysql.NewConfigFromClusterKey(ctx, r.Client, db.GetClusterKey()))
-	defer closeConn()
 	if errors.IsNotFound(err) {
 		// if the mysql cluster does not exists then we can safely assume that
 		// the db is deleted so exist successfully
@@ -114,7 +113,7 @@ func (r *MariaDBDatabaseReconciler) deleteDatabase(ctx context.Context, db *mari
 	} else if err != nil {
 		return err
 	}
-
+	defer closeConn()
 	log.Info("removing database from mysql cluster", "key", db, "database", db.Spec.Database)
 
 	// Remove database from MySQL then remove finalizer

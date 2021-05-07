@@ -16,7 +16,21 @@ spec:
     singular: mariadbuser
   scope: Namespaced
   versions:
-  - name: v1alpha1
+  - additionalPrinterColumns:
+    - description: The user status
+      jsonPath: .status.conditions[?(@.type == 'Ready')].status
+      name: Ready
+      type: string
+    - jsonPath: .spec.clusterRef.name
+      name: Cluster
+      type: string
+    - jsonPath: .spec.user
+      name: UserName
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1alpha1
     schema:
       openAPIV3Schema:
         description: MariaDBUser is the Schema for the mariadbusers API
@@ -36,10 +50,11 @@ spec:
           spec:
             description: MariaDBUserSpec defines the desired state of MariaDBUser
             properties:
-              characterSet:
-                description: CharacterSet represents the charset name used when database
-                  is created
-                type: string
+              allowedHosts:
+                description: AllowedHosts is the allowed host to connect from.
+                items:
+                  type: string
+                type: array
               clusterRef:
                 description: ClusterRef represents a reference to the MySQL cluster.
                   This field should be immutable.
@@ -52,17 +67,81 @@ spec:
                     description: Namespace the MySQL cluster namespace
                     type: string
                 type: object
-              collation:
-                description: Collation represents the collation name used as default
-                  database collation
-                type: string
-              database:
-                description: Database represents the database name which will be created.
-                  This field should be immutable.
+              limits:
+                description: 'ResourceLimits allow settings limit per mysql user as
+                  defined here: https://mariadb.com/kb/en/create-user/'
+                properties:
+                  MAX_CONNECTIONS_PER_HOUR:
+                    type: integer
+                  MAX_QUERIES_PER_HOUR:
+                    type: integer
+                  MAX_STATEMENT_TIME:
+                    type: integer
+                  MAX_UPDATES_PER_HOUR:
+                    type: integer
+                  MAX_USER_CONNECTIONS:
+                    type: integer
+                required:
+                - MAX_CONNECTIONS_PER_HOUR
+                - MAX_QUERIES_PER_HOUR
+                - MAX_STATEMENT_TIME
+                - MAX_UPDATES_PER_HOUR
+                - MAX_USER_CONNECTIONS
+                type: object
+              password:
+                description: Password is the password for the user.
+                properties:
+                  key:
+                    description: The key of the secret to select from.  Must be a
+                      valid secret key.
+                    type: string
+                  name:
+                    description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                      TODO: Add other useful fields. apiVersion, kind, uid?'
+                    type: string
+                  optional:
+                    description: Specify whether the Secret or its key must be defined
+                    type: boolean
+                required:
+                - key
+                type: object
+              permissions:
+                description: Permissions is the list of roles that user has in the
+                  specified database.
+                items:
+                  description: MariaDBPermission defines a MariaDB schema permission
+                  properties:
+                    permissions:
+                      description: Permissions represents the permissions granted
+                        on the schema/tables
+                      items:
+                        type: string
+                      type: array
+                    schema:
+                      description: Schema represents the schema to which the permission
+                        applies
+                      type: string
+                    tables:
+                      description: Tables represents the tables inside the schema
+                        to which the permission applies
+                      items:
+                        type: string
+                      type: array
+                  required:
+                  - permissions
+                  - schema
+                  - tables
+                  type: object
+                type: array
+              user:
+                description: User is the name of the user that will be created with
+                  will access the specified database. This field should be immutable.
                 type: string
             required:
+            - allowedHosts
             - clusterRef
-            - database
+            - password
+            - user
             type: object
           status:
             description: MariaDBUserStatus defines the observed state of MariaDBUser
