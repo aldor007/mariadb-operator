@@ -223,7 +223,7 @@ func (r *Reconciler) CreateHeadlessService(dbType string) corev1.Service {
 
 	s := corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprintf("mariadb-headless-%s-%s", r.MariaDBCluster.Name, dbType),
+			Name:      r.MariaDBCluster.GetPrimaryHeadlessSvc(),
 			Namespace: r.MariaDBCluster.Namespace,
 			Labels:    labels,
 		},
