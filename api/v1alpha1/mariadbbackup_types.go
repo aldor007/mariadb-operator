@@ -28,8 +28,19 @@ type MariaDBBackupSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	// Foo is an example field of MariaDBBackup. Edit mariadbbackup_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	// ClusterRef represents a reference to the MySQL cluster.
+	// This field should be immutable.
+	ClusterRef ClusterReference `json:"clusterRef"`
+
+	// BackupURL represents the URL to the backup location
+	BackupURL string `json:"backupURL"`
+
+	// BackupSecretName the name of secrets that contains the credentials to
+	BackupSecretName string `json:"backupSecretName"`
+
+	// CronExpression represents cron syntax for kubernetes CronJob
+	// +optional
+	CronExpression string `json:"cron,omitempty"`
 }
 
 // MariaDBBackupStatus defines the observed state of MariaDBBackup

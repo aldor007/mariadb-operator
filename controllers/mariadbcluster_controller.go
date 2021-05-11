@@ -20,6 +20,7 @@ import (
 	"context"
 	"github.com/aldor007/mariadb-operator/resources"
 	"github.com/aldor007/mariadb-operator/resources/primary"
+	"github.com/aldor007/mariadb-operator/resources/secret"
 	"github.com/go-logr/logr"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -67,6 +68,7 @@ func (r *MariaDBClusterReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		return ctrl.Result{}, err
 	}
 	reconcilers := []resources.ComponentReconciler{
+		secret.NewOperatorSecret(r.Client, r.DirectClient, r.Scheme, instance),
 		primary.NewPrimary(r.Client, r.DirectClient, r.Scheme, instance),
 	}
 

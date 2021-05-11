@@ -57,6 +57,8 @@ fi
 "${mysql[@]}" <<-EOSQL
 CREATE USER 'xtrabackup_sst'@'localhost' IDENTIFIED BY 'xtrabackup_sst' ;
 GRANT PROCESS, RELOAD, LOCK TABLES, REPLICATION CLIENT ON *.* TO 'xtrabackup_sst'@'localhost' ;
+CREATE USER '${BACKUP_USER}'@'%' IDENTIFIED BY '${BACKUP_PASSWORD}' ;
+GRANT PROCESS, RELOAD, LOCK TABLES, REPLICATION CLIENT ON *.* TO '${BACKUP_USER}'@'%' ;
 CREATE USER 'readinessProbe'@'localhost' IDENTIFIED BY 'readinessProbe';
 FLUSH PRIVILEGES ;
 EOSQL

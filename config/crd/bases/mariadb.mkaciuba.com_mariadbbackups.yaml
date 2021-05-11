@@ -36,10 +36,33 @@ spec:
           spec:
             description: MariaDBBackupSpec defines the desired state of MariaDBBackup
             properties:
-              foo:
-                description: Foo is an example field of MariaDBBackup. Edit mariadbbackup_types.go
-                  to remove/update
+              backupSecretName:
+                description: BackupSecretName the name of secrets that contains the
+                  credentials to
                 type: string
+              backupURL:
+                description: BackupURL represents the URL to the backup location
+                type: string
+              clusterRef:
+                description: ClusterRef represents a reference to the MySQL cluster.
+                  This field should be immutable.
+                properties:
+                  name:
+                    description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                      TODO: Add other useful fields. apiVersion, kind, uid?'
+                    type: string
+                  namespace:
+                    description: Namespace the MySQL cluster namespace
+                    type: string
+                type: object
+              cron:
+                description: CronExpression represents cron syntax for kubernetes
+                  CronJob
+                type: string
+            required:
+            - backupSecretName
+            - backupURL
+            - clusterRef
             type: object
           status:
             description: MariaDBBackupStatus defines the observed state of MariaDBBackup

@@ -102,6 +102,10 @@ func (c *MariaDBCluster) GetPrimaryHeadlessSvc() string {
 	return fmt.Sprintf("mariadb-headless-%s-%s", c.Name, "primary")
 }
 
+func (c *MariaDBCluster) GetOperatorSecretName() string {
+	return fmt.Sprintf("mariadb-%s-operated", c.Name)
+}
+
 //+kubebuilder:object:root=true
 
 // MariaDBClusterList contains a list of MariaDBCluster

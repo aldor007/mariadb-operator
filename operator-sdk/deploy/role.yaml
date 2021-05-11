@@ -82,7 +82,7 @@ rules:
 - apiGroups:
   - batch
   resources:
-  - cronjobs
+  - backup
   - jobs
   verbs:
   - create

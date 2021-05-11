@@ -106,6 +106,15 @@ func (r *Reconciler) CreateStatefulSet(dbType string) appsv1.StatefulSet {
 								MountPath: "/var/lib/mysql",
 							},
 						},
+						EnvFrom: []corev1.EnvFromSource{
+							{
+								SecretRef: &corev1.SecretEnvSource{
+									LocalObjectReference: corev1.LocalObjectReference{
+										Name: r.MariaDBCluster.GetOperatorSecretName(),
+									},
+								},
+							},
+						},
 						Env: []corev1.EnvVar{
 							{
 								Name:      "MYSQL_ROOT_PASSWORD",

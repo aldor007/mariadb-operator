@@ -34,6 +34,7 @@ RUN apt update \
     mariadb-server \
     mariadb-backup \
     rsync \
+    rclone \
     socat \
     tzdata \
   && apt clean

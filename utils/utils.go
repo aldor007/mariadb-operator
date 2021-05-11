@@ -3,7 +3,13 @@ package utils
 import (
 	"github.com/aldor007/mariadb-operator/api/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"math/rand"
+	"time"
 )
+
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
 
 func Labels(cluster *v1alpha1.MariaDBCluster) map[string]string {
 	return map[string]string{
@@ -75,4 +81,14 @@ func StringIn(str string, strs []string) (int, bool) {
 		}
 	}
 	return 0, false
+}
+
+var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+
+func RandString(n int) string {
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = letterRunes[rand.Intn(len(letterRunes))]
+	}
+	return string(b)
 }
