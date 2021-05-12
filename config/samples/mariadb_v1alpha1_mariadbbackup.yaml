@@ -3,5 +3,8 @@ kind: MariaDBBackup
 metadata:
   name: mariadbbackup-sample
 spec:
-  # Add fields here
-  foo: bar
+  clusterRef:
+    name: cluster-sample
+    namespace: default
+  backupURL: s3://mkaciuba-backup/mariadb
+  backupSecretName: s3-backup

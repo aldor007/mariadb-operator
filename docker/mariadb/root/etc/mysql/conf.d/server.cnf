@@ -7,7 +7,17 @@ bind-address                      = 0.0.0.0
 datadir = /var/lib/mysql
 ignore_db_dirs=lost+found
 socket = /var/run/mysqld/mysql.sock
+bind_address			= 0.0.0.0
 
+user                    = mysql
+pid-file                = /run/mysqld/mysqld.pid
+basedir                 = /usr
+tmpdir                  = /tmp
+lc-messages-dir         = /usr/share/mysql
+lc-messages             = en_US
+skip-external-locking
+character-set-server  = utf8mb4
+collation-server      = utf8mb4_general_ci
 #
 # * Galera-related settings
 #

@@ -1,0 +1,189 @@
+
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.4.1
+  creationTimestamp: null
+  name: mariadbusers.mariadb.mkaciuba.com
+spec:
+  group: mariadb.mkaciuba.com
+  names:
+    kind: MariaDBUser
+    listKind: MariaDBUserList
+    plural: mariadbusers
+    singular: mariadbuser
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: The user status
+      jsonPath: .status.conditions[?(@.type == 'Ready')].status
+      name: Ready
+      type: string
+    - jsonPath: .spec.clusterRef.name
+      name: Cluster
+      type: string
+    - jsonPath: .spec.user
+      name: UserName
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: MariaDBUser is the Schema for the mariadbusers API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: MariaDBUserSpec defines the desired state of MariaDBUser
+            properties:
+              allowedHosts:
+                description: AllowedHosts is the allowed host to connect from.
+                items:
+                  type: string
+                type: array
+              clusterRef:
+                description: ClusterRef represents a reference to the MySQL cluster.
+                  This field should be immutable.
+                properties:
+                  name:
+                    description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                      TODO: Add other useful fields. apiVersion, kind, uid?'
+                    type: string
+                  namespace:
+                    description: Namespace the MySQL cluster namespace
+                    type: string
+                type: object
+              limits:
+                description: 'ResourceLimits allow settings limit per mysql user as
+                  defined here: https://mariadb.com/kb/en/create-user/'
+                properties:
+                  MAX_CONNECTIONS_PER_HOUR:
+                    type: integer
+                  MAX_QUERIES_PER_HOUR:
+                    type: integer
+                  MAX_STATEMENT_TIME:
+                    type: integer
+                  MAX_UPDATES_PER_HOUR:
+                    type: integer
+                  MAX_USER_CONNECTIONS:
+                    type: integer
+                required:
+                - MAX_CONNECTIONS_PER_HOUR
+                - MAX_QUERIES_PER_HOUR
+                - MAX_STATEMENT_TIME
+                - MAX_UPDATES_PER_HOUR
+                - MAX_USER_CONNECTIONS
+                type: object
+              password:
+                description: Password is the password for the user.
+                properties:
+                  key:
+                    description: The key of the secret to select from.  Must be a
+                      valid secret key.
+                    type: string
+                  name:
+                    description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                      TODO: Add other useful fields. apiVersion, kind, uid?'
+                    type: string
+                  optional:
+                    description: Specify whether the Secret or its key must be defined
+                    type: boolean
+                required:
+                - key
+                type: object
+              permissions:
+                description: Permissions is the list of roles that user has in the
+                  specified database.
+                items:
+                  description: MariaDBPermission defines a MariaDB schema permission
+                  properties:
+                    permissions:
+                      description: Permissions represents the permissions granted
+                        on the schema/tables
+                      items:
+                        type: string
+                      type: array
+                    schema:
+                      description: Schema represents the schema to which the permission
+                        applies
+                      type: string
+                    tables:
+                      description: Tables represents the tables inside the schema
+                        to which the permission applies
+                      items:
+                        type: string
+                      type: array
+                  required:
+                  - permissions
+                  - schema
+                  - tables
+                  type: object
+                type: array
+              user:
+                description: User is the name of the user that will be created with
+                  will access the specified database. This field should be immutable.
+                type: string
+            required:
+            - allowedHosts
+            - clusterRef
+            - password
+            - user
+            type: object
+          status:
+            description: MariaDBUserStatus defines the observed state of MariaDBUser
+            properties:
+              allowedHosts:
+                description: AllowedHosts contains the list of hosts that the user
+                  is allowed to connect from.
+                items:
+                  type: string
+                type: array
+              conditions:
+                description: Conditions represents the MysqlUser resource conditions
+                  list.
+                properties:
+                  lastUpdateTime:
+                    description: The last time this condition was updated.
+                    format: date-time
+                    type: string
+                  message:
+                    description: A human readable message indicating details about
+                      the transition.
+                    type: string
+                  reason:
+                    description: The reason for the condition's last transition.
+                    type: string
+                  status:
+                    description: Status of the condition, one of True, False, Unknown.
+                    type: string
+                required:
+                - message
+                - reason
+                - status
+                type: object
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []

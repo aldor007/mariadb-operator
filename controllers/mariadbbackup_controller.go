@@ -18,8 +18,10 @@ package controllers
 
 import (
 	"context"
-
+	"github.com/aldor007/mariadb-operator/resources"
+	"github.com/aldor007/mariadb-operator/resources/backup"
 	"github.com/go-logr/logr"
+	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -48,11 +50,37 @@ type MariaDBBackupReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.7.2/pkg/reconcile
 func (r *MariaDBBackupReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = r.Log.WithValues("mariadbbackup", req.NamespacedName)
+	log := r.Log.WithValues("Request.Namespace", req.NamespacedName, "Request.Name", req.Name)
 
-	// your logic here
+	// Fetch the MariaDB instance
+	backupCr := &mariadbv1alpha1.MariaDBBackup{}
+	err := r.Client.Get(ctx, req.NamespacedName, backupCr)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			// Request object not found, could have been deleted after reconcile request.
+			// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
+			// Return and don't requeue
+			return ctrl.Result{}, nil
+		}
+		// Error reading the object - requeue the request.
+		return ctrl.Result{}, err
+	}
+	cluster := &mariadbv1alpha1.MariaDBCluster{}
+	err = r.Client.Get(ctx, backupCr.GetClusterKey(), cluster)
+
+	reconcilers := []resources.ComponentReconciler{
+		backup.NewBackupJobs(r.Client, nil, r.Scheme, cluster, backupCr),
+	}
+
+	for _, rec := range reconcilers {
+		err = rec.Reconcile(ctx, log)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+	}
 
 	return ctrl.Result{}, nil
+
 }
 
 // SetupWithManager sets up the controller with the Manager.

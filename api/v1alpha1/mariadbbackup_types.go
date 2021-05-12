@@ -18,6 +18,7 @@ package v1alpha1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
@@ -59,6 +60,18 @@ type MariaDBBackup struct {
 
 	Spec   MariaDBBackupSpec   `json:"spec,omitempty"`
 	Status MariaDBBackupStatus `json:"status,omitempty"`
+}
+
+func (db *MariaDBBackup) GetClusterKey() client.ObjectKey {
+	ns := db.Spec.ClusterRef.Namespace
+	if ns == "" {
+		ns = db.Namespace
+	}
+
+	return client.ObjectKey{
+		Name:      db.Spec.ClusterRef.Name,
+		Namespace: ns,
+	}
 }
 
 //+kubebuilder:object:root=true
