@@ -32,6 +32,32 @@ rules:
   - patch
   - update
 - apiGroups:
+    - mariadb.mkaciuba.com
+  resources:
+    - mariadbclusters
+  verbs:
+    - create
+    - delete
+    - get
+    - list
+    - patch
+    - update
+    - watch
+- apiGroups:
+    - mariadb.mkaciuba.com
+  resources:
+    - mariadbclusters/finalizers
+  verbs:
+    - update
+- apiGroups:
+    - mariadb.mkaciuba.com
+  resources:
+    - mariadbclusters/status
+  verbs:
+    - get
+    - patch
+    - update
+- apiGroups:
   - mariadb.mkaciuba.com
   resources:
   - mariadbbackups
