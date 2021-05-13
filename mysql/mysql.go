@@ -43,7 +43,7 @@ func NewConfigFromClusterKey(ctx context.Context, c client.Client, clusterKey cl
 	return &Config{
 		User:     "root",
 		Password: string(secret.Data[cluster.Spec.RootPassword.Key]),
-		Host:     cluster.GetPrimaryAddress(),
+		Host:     cluster.GetPrimaryHeadlessSvc(),
 		Port:     3306,
 	}, nil
 }
