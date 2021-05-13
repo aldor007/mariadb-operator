@@ -18,6 +18,7 @@ package main
 
 import (
 	"flag"
+	"github.com/aldor007/mariadb-operator/mysql"
 	"os"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
@@ -72,6 +73,8 @@ func main() {
 		HealthProbeBindAddress: probeAddr,
 		LeaderElection:         enableLeaderElection,
 		LeaderElectionID:       "f33e2359.mariadb.mkaciuba.com",
+		ReadinessEndpointName:  "/ready",
+		LivenessEndpointName:   "/health",
 	})
 	if err != nil {
 		setupLog.Error(err, "unable to start manager")
@@ -86,24 +89,24 @@ func main() {
 		setupLog.Error(err, "unable to create controller", "controller", "MariaDBCluster")
 		os.Exit(1)
 	}
-	//if err = (&controllers.MariaDBUserReconciler{
-	//	Client:           mgr.GetClient(),
-	//	Log:              ctrl.Log.WithName("controllers").WithName("MariaDBUser"),
-	//	Scheme:           mgr.GetScheme(),
-	//	SQLRunnerFactory: mysql.NewSQLRunner,
-	//}).SetupWithManager(mgr); err != nil {
-	//	setupLog.Error(err, "unable to create controller", "controller", "MariaDBUser")
-	//	os.Exit(1)
-	//}
-	//if err = (&controllers.MariaDBDatabaseReconciler{
-	//	Client:           mgr.GetClient(),
-	//	Log:              ctrl.Log.WithName("controllers").WithName("MariaDBDatabase"),
-	//	Scheme:           mgr.GetScheme(),
-	//	SQLRunnerFactory: mysql.NewSQLRunner,
-	//}).SetupWithManager(mgr); err != nil {
-	//	setupLog.Error(err, "unable to create controller", "controller", "MariaDBDatabase")
-	//	os.Exit(1)
-	//}
+	if err = (&controllers.MariaDBUserReconciler{
+		Client:           mgr.GetClient(),
+		Log:              ctrl.Log.WithName("controllers").WithName("MariaDBUser"),
+		Scheme:           mgr.GetScheme(),
+		SQLRunnerFactory: mysql.NewSQLRunner,
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "MariaDBUser")
+		os.Exit(1)
+	}
+	if err = (&controllers.MariaDBDatabaseReconciler{
+		Client:           mgr.GetClient(),
+		Log:              ctrl.Log.WithName("controllers").WithName("MariaDBDatabase"),
+		Scheme:           mgr.GetScheme(),
+		SQLRunnerFactory: mysql.NewSQLRunner,
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "MariaDBDatabase")
+		os.Exit(1)
+	}
 	if err = (&controllers.MariaDBBackupReconciler{
 		Client: mgr.GetClient(),
 		Log:    ctrl.Log.WithName("controllers").WithName("MariaDBBackup"),
