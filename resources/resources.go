@@ -32,6 +32,8 @@ type Reconciler struct {
 func (r *Reconciler) CreateStatefulSet(dbType string) appsv1.StatefulSet {
 	labels := utils.Labels(r.MariaDBCluster)
 	labels["mariadb/type"] = dbType
+	labels["mariadb/pods"] = fmt.Sprintf("%s-%s",r.MariaDBCluster.Name, dbType)
+
 	size := r.MariaDBCluster.Spec.PrimaryCount
 	image := r.MariaDBCluster.Spec.Image
 
@@ -122,7 +124,7 @@ func (r *Reconciler) CreateStatefulSet(dbType string) appsv1.StatefulSet {
 							},
 							{
 								Name:  "LABEL_SELECTOR",
-								Value: fmt.Sprintf("MariaDB_cr=%s", r.MariaDBCluster.Name),
+								Value: fmt.Sprintf("mariadb/pods=%s-%s", r.MariaDBCluster.Name, dbType),
 							},
 							{
 								Name:  "GALLERA_MODE",
