@@ -61,11 +61,30 @@ type MariaDBClusterSpec struct {
 	// A map[string]string that will be passed to my.cnf file.
 	// +optional
 	MariaDBConf MariaDBConf `json:"MariaDBConf,omitempty"`
+
+	// ServiceConf represents config for k8s service
+	// +optional
+	ServiceConf ServiceConf `json:"service,omitempty"`
 }
 
 // MariaDBConf defines type for extra cluster configs. It's a simple map between
 // string and string.
 type MariaDBConf map[string]intstr.IntOrString
+
+// ServiceConf defines kubernetes service config
+type ServiceConf struct {
+	// Enabled flag indicated if service is enabled
+	Enabled bool `json:"enabled,omitempty"`
+
+	// Annotation for service
+	Annotation map[string]string `json:"annotation,omitempty"`
+
+	// LoadbalancerIP is a address assigned to service
+	LoadbalancerIP string `json:"loadbalancerIP,omitempty"`
+
+	// +kubebuilder:default:="ClusterIP"
+	Type corev1.ServiceType `json:"type,omitempty"`
+}
 
 // MariaDBClusterStatus defines the observed state of MariaDBCluster
 type MariaDBClusterStatus struct {

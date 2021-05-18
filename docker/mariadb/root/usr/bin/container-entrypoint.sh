@@ -27,10 +27,17 @@ else
 	echo "------------------------"
 	cp ${CONTAINER_SCRIPTS_DIR}/galera.cnf ${EXTRA_DEFAULTS_FILE}
 	cp ${CONTAINER_SCRIPTS_DIR}/galera.cnf /etc/mysql/conf.d/galera.cnf
-	if [ ! -f "/var/lib/mysql/grastate.dat" ]; then
-	  echo "safe_to_bootstrap: 1" > /var/lib/mysql/grastate.dat
-	  chown mysql:mysql /var/lib/mysql/grastate.dat
-  fi
+	if [  -f "/var/lib/mysql/grastate.dat" ]; then
+	  if  grep -q "safe_to_bootstrap: 1" "/var/lib/mysql/grastate.dat"; then
+      echo "safe_to_bootstrap present"
+    else
+	    echo "safe_to_bootstrap: 1" >> /var/lib/mysql/grastate.dat
+	    chown mysql:mysql /var/lib/mysql/grastate.dat
+    fi
+  else
+	    echo "safe_to_bootstrap: 1" > /var/lib/mysql/grastate.dat
+	    chown mysql:mysql /var/lib/mysql/grastate.dat
+	fi
 	/usr/bin/peer-finder -on-start="${CONTAINER_SCRIPTS_DIR}/configure-galera.sh" -labels="${LABEL_SELECTOR}" -ns=${MY_POD_NAMESPACE}
 fi
 

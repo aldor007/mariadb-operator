@@ -80,6 +80,26 @@ spec:
                 required:
                 - key
                 type: object
+              service:
+                description: ServiceConf represents config for k8s service
+                properties:
+                  annotation:
+                    additionalProperties:
+                      type: string
+                    description: Annotation for service
+                    type: object
+                  enabled:
+                    description: Enabled flag indicated if service is enabled
+                    type: boolean
+                  loadbalancerIP:
+                    description: LoadbalancerIP is a address assigned to service
+                    type: string
+                  type:
+                    default: ClusterIP
+                    description: Service Type string describes ingress methods for
+                      a service
+                    type: string
+                type: object
               storageClass:
                 type: string
             required:

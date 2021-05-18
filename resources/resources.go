@@ -32,7 +32,7 @@ type Reconciler struct {
 func (r *Reconciler) CreateStatefulSet(dbType string) appsv1.StatefulSet {
 	labels := utils.Labels(r.MariaDBCluster)
 	labels["mariadb/type"] = dbType
-	labels["mariadb/pods"] = fmt.Sprintf("%s-%s",r.MariaDBCluster.Name, dbType)
+	labels["mariadb/pods"] = fmt.Sprintf("%s-%s", r.MariaDBCluster.Name, dbType)
 
 	size := r.MariaDBCluster.Spec.PrimaryCount
 	image := r.MariaDBCluster.Spec.Image
