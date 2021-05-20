@@ -10,7 +10,6 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/util/intstr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
@@ -202,56 +201,6 @@ func (r *Reconciler) createPVC() corev1.PersistentVolumeClaim {
 
 	controllerutil.SetControllerReference(r.MariaDBCluster, pvc, r.Scheme)
 	return *pvc
-}
-
-func (r *Reconciler) CreateService(dbType string) corev1.Service {
-	labels := utils.Labels(r.MariaDBCluster)
-	labels["mariadb/type"] = dbType
-
-	s := corev1.Service{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      r.MariaDBCluster.GetPrimarySvc(),
-			Namespace: r.MariaDBCluster.Namespace,
-			Labels:    labels,
-		},
-		Spec: corev1.ServiceSpec{
-			Selector: labels,
-			Ports: []corev1.ServicePort{{
-				Protocol:   corev1.ProtocolTCP,
-				Port:       3306,
-				TargetPort: intstr.FromInt(3306),
-			}},
-			Type: corev1.ServiceTypeClusterIP,
-		},
-	}
-
-	controllerutil.SetControllerReference(r.MariaDBCluster, &s, r.Scheme)
-	return s
-}
-func (r *Reconciler) CreateHeadlessService(dbType string) corev1.Service {
-	labels := utils.Labels(r.MariaDBCluster)
-	labels["mariadb/type"] = dbType
-
-	s := corev1.Service{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      r.MariaDBCluster.GetPrimaryHeadlessSvc(),
-			Namespace: r.MariaDBCluster.Namespace,
-			Labels:    labels,
-		},
-		Spec: corev1.ServiceSpec{
-			Selector: labels,
-			Ports: []corev1.ServicePort{{
-				Protocol:   corev1.ProtocolTCP,
-				Port:       3306,
-				TargetPort: intstr.FromInt(3306),
-			}},
-			Type:      corev1.ServiceTypeClusterIP,
-			ClusterIP: "None",
-		},
-	}
-
-	controllerutil.SetControllerReference(r.MariaDBCluster, &s, r.Scheme)
-	return s
 }
 
 // ComponentReconciler describes the Reconcile method

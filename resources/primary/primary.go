@@ -5,7 +5,6 @@ import (
 	mariadbv1alpha1 "github.com/aldor007/mariadb-operator/api/v1alpha1"
 	"github.com/aldor007/mariadb-operator/resources"
 	appsv1 "k8s.io/api/apps/v1"
-	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 
@@ -95,31 +94,6 @@ func (r *Reconciler) Reconcile(ctx context.Context, log logr.Logger) error {
 			return err
 		}
 		log.Info("Updated Deployment image. ")
-	}
-
-	svc := r.CreateHeadlessService("primary")
-	foundSvc := &v1.Service{}
-	err = r.Client.Get(ctx, types.NamespacedName{
-		Name:      svc.Name,
-		Namespace: r.MariaDBCluster.Namespace,
-	}, foundSvc)
-	if err != nil && errors.IsNotFound(err) {
-		// Create the deployment
-		log.Info("Creating a new svc", "name", svc.Name)
-		err = r.Client.Create(ctx, &svc)
-
-		if err != nil {
-			// Deployment failed
-			log.Error(err, "Failed to create new statefulset", "Deployment.Name", svc.Name)
-			return err
-		} else {
-			// Deployment was successful
-			return nil
-		}
-	} else if err != nil {
-		// Error that isn't due to the deployment not existing
-		log.Error(err, "Failed to get Deployment")
-		return err
 	}
 
 	return nil
