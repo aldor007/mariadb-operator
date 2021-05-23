@@ -61,6 +61,16 @@ func (r *Reconciler) Reconcile(ctx context.Context, log logr.Logger) error {
 				return err
 			}
 		}
+
+		if job.Annotations != nil || job.Annotations[r.GetConfigAnnotation()] != r.backup.GetConfigHash() {
+			job = r.createCronJobs(r.backup)
+			err = r.Client.Update(ctx, &job)
+			if err != nil {
+				// Deployment failed
+				log.Error(err, "Failed to update cronjob", "Name", job.Name)
+				return err
+			}
+		}
 	} else {
 		job := r.createJob(r.backup)
 		err := r.Client.Get(ctx, types.NamespacedName{
@@ -73,7 +83,17 @@ func (r *Reconciler) Reconcile(ctx context.Context, log logr.Logger) error {
 			err = r.Client.Create(ctx, &job)
 			if err != nil {
 				// Deployment failed
-				log.Error(err, "Failed to create new cronjob", "Name", job.Name)
+				log.Error(err, "Failed to create new job", "Name", job.Name)
+				return err
+			}
+		}
+
+		if job.Annotations != nil || job.Annotations[r.GetConfigAnnotation()] != r.backup.GetConfigHash() {
+			job = r.createJob(r.backup)
+			err = r.Client.Update(ctx, &job)
+			if err != nil {
+				// Deployment failed
+				log.Error(err, "Failed to update njob", "Name", job.Name)
 				return err
 			}
 		}
@@ -83,11 +103,14 @@ func (r *Reconciler) Reconcile(ctx context.Context, log logr.Logger) error {
 }
 
 func (r *Reconciler) createCronJobs(cron *mariadbv1alpha1.MariaDBBackup) batchv1beta.CronJob {
+	annotations := make(map[string]string)
+	annotations[r.GetConfigAnnotation()] = cron.GetConfigHash()
 
 	job := batchv1beta.CronJob{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprintf("%s-%s", "backup", r.MariaDBCluster.Name),
-			Namespace: r.MariaDBCluster.Namespace,
+			Name:        fmt.Sprintf("%s-%s", "backup", r.MariaDBCluster.Name),
+			Namespace:   r.MariaDBCluster.Namespace,
+			Annotations: annotations,
 		},
 		Spec: batchv1beta.CronJobSpec{
 			Schedule: cron.Spec.CronExpression,
@@ -108,11 +131,14 @@ func (r *Reconciler) createCronJobs(cron *mariadbv1alpha1.MariaDBBackup) batchv1
 	return job
 }
 func (r *Reconciler) createJob(cron *mariadbv1alpha1.MariaDBBackup) batchv1.Job {
+	annotations := make(map[string]string)
+	annotations[r.GetConfigAnnotation()] = cron.GetConfigHash()
 
 	job := batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprintf("%s-%s", "backup", r.MariaDBCluster.Name),
-			Namespace: r.MariaDBCluster.Namespace,
+			Name:        fmt.Sprintf("%s-%s", "backup", r.MariaDBCluster.Name),
+			Namespace:   r.MariaDBCluster.Namespace,
+			Annotations: annotations,
 		},
 		Spec: batchv1.JobSpec{
 			Parallelism:             nil,
@@ -166,7 +192,7 @@ func (r *Reconciler) createPodTemplate(cron *mariadbv1alpha1.MariaDBBackup) core
 						},
 						{
 							Name:  "HOST",
-							Value: r.MariaDBCluster.GetPrimaryHeadlessSvc(),
+							Value: r.MariaDBCluster.GetPrimaryHeadlessSvcName(),
 						},
 						{
 							Name:  "PORT",

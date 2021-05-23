@@ -17,6 +17,8 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -72,6 +74,13 @@ func (db *MariaDBBackup) GetClusterKey() client.ObjectKey {
 		Name:      db.Spec.ClusterRef.Name,
 		Namespace: ns,
 	}
+}
+
+func (db *MariaDBBackup) GetConfigHash() string {
+	h := sha256.New()
+	h.Write([]byte(db.Spec.CronExpression))
+	h.Write([]byte(db.Spec.BackupURL))
+	return hex.EncodeToString(h.Sum(nil))
 }
 
 //+kubebuilder:object:root=true

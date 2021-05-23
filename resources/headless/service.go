@@ -44,12 +44,6 @@ func (r *Reconciler) Reconcile(ctx context.Context, log logr.Logger) error {
 	log = log.WithValues("component", componentName, "clusterName", r.MariaDBCluster.Name, "clusterNamespace", r.MariaDBCluster.Namespace)
 
 	log.V(1).Info("Reconciling")
-
-	if !r.MariaDBCluster.Spec.ServiceConf.Enabled {
-		log.Info("Service not enabled")
-		return nil
-	}
-
 	svc := r.CreateHeadlessService(r.DBType)
 	foundSvc := &v1.Service{}
 	err := r.Client.Get(ctx, types.NamespacedName{
@@ -65,9 +59,6 @@ func (r *Reconciler) Reconcile(ctx context.Context, log logr.Logger) error {
 			// Deployment failed
 			log.Error(err, "Failed to create new service", "service.Name", svc.Name)
 			return err
-		} else {
-			// Deployment was successful
-			return nil
 		}
 	} else if err != nil {
 		// Error that isn't due to the deployment not existing
@@ -84,7 +75,7 @@ func (r *Reconciler) CreateHeadlessService(dbType string) corev1.Service {
 
 	s := corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      r.MariaDBCluster.GetPrimaryHeadlessSvc(),
+			Name:      r.MariaDBCluster.GetPrimaryHeadlessSvcName(),
 			Namespace: r.MariaDBCluster.Namespace,
 			Labels:    labels,
 		},

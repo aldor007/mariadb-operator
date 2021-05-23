@@ -17,6 +17,8 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -106,23 +108,35 @@ type MariaDBCluster struct {
 }
 
 func (c *MariaDBCluster) GetPrimaryAddress() string {
-	return fmt.Sprintf("%s.%s", c.GetPrimarySvc(), c.Namespace)
+	return fmt.Sprintf("%s.%s", c.GetPrimarySvcName(), c.Namespace)
 }
 
-func (c *MariaDBCluster) GetPrimarySvc() string {
+func (c *MariaDBCluster) GetPrimarySvcName() string {
 	return fmt.Sprintf("mariadb-%s-%s", c.Name, "primary")
 }
 
 func (c *MariaDBCluster) GetPrimaryHeadlessAddress() string {
-	return fmt.Sprintf("%s.%s", c.GetPrimaryHeadlessSvc(), c.Namespace)
+	return fmt.Sprintf("%s.%s", c.GetPrimaryHeadlessSvcName(), c.Namespace)
 }
 
-func (c *MariaDBCluster) GetPrimaryHeadlessSvc() string {
+func (c *MariaDBCluster) GetPrimaryHeadlessSvcName() string {
 	return fmt.Sprintf("mariadb-headless-%s-%s", c.Name, "primary")
 }
 
 func (c *MariaDBCluster) GetOperatorSecretName() string {
 	return fmt.Sprintf("mariadb-%s-operated", c.Name)
+}
+
+func (c *MariaDBCluster) GetStatefulsetName(dbType string) string {
+	return fmt.Sprintf("%s-%s", c.Name, dbType)
+}
+
+func (c *MariaDBCluster) GetConfigHash() string {
+	h := sha256.New()
+	h.Write([]byte(c.Spec.Image))
+	h.Write([]byte(c.Spec.DataStorageSize))
+	h.Write([]byte(fmt.Sprintf("%d", c.Spec.ReplicaCount)))
+	return hex.EncodeToString(h.Sum(nil))
 }
 
 //+kubebuilder:object:root=true

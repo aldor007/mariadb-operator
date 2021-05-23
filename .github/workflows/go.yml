@@ -22,4 +22,5 @@ jobs:
       run: go build -v ./...
 
     - name: Test
-      run: go test -v ./...
+      run: 	go test -v $$(go list ./... | grep -v vendor/ | grep -v test/e2e) -race -coverprofile=coverage.txt -covermode=atomic
+

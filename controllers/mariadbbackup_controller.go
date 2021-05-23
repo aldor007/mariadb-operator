@@ -67,6 +67,10 @@ func (r *MariaDBBackupReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 	}
 	cluster := &mariadbv1alpha1.MariaDBCluster{}
 	err = r.Client.Get(ctx, backupCr.GetClusterKey(), cluster)
+	if err != nil {
+		log.Error(err, "Unable to get cluster")
+		return ctrl.Result{}, err
+	}
 
 	reconcilers := []resources.ComponentReconciler{
 		backup.NewBackupJobs(r.Client, nil, r.Scheme, cluster, backupCr),

@@ -80,7 +80,7 @@ func (r *Reconciler) CreatePrimaryService() corev1.Service {
 
 	s := corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:        r.MariaDBCluster.GetPrimarySvc(),
+			Name:        r.MariaDBCluster.GetPrimarySvcName(),
 			Namespace:   r.MariaDBCluster.Namespace,
 			Annotations: r.MariaDBCluster.Spec.ServiceConf.Annotation,
 			Labels:      labels,
