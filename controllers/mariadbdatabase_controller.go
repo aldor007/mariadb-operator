@@ -57,7 +57,6 @@ type MariaDBDatabaseReconciler struct {
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.7.2/pkg/reconcile
 func (r *MariaDBDatabaseReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := r.Log.WithValues("mariadbdatabase", req.NamespacedName)
-
 	instance := &mariadbv1alpha1.MariaDBDatabase{}
 	err := r.Client.Get(ctx, req.NamespacedName, instance)
 	if err != nil {
@@ -86,7 +85,7 @@ func (r *MariaDBDatabaseReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	// reconcile database in mysql
 	err = r.createDatabase(ctx, instance, log)
 	if err != nil {
-		return reconcile.Result{}, nil //r.updateReadyCondition(ctx, oldDBStatus, db, err)
+		return reconcile.Result{}, err
 	}
 
 	// Add finalier if needed
@@ -126,7 +125,6 @@ func (r *MariaDBDatabaseReconciler) deleteDatabase(ctx context.Context, db *mari
 
 func (r *MariaDBDatabaseReconciler) createDatabase(ctx context.Context, db *mariadbv1alpha1.MariaDBDatabase, log logr.Logger) error {
 	log.Info("creating MySQL database", "name", db.Name, "database", db.Spec.Database)
-
 	sql, closeConn, err := r.SQLRunnerFactory(mysql.NewConfigFromClusterKey(ctx, r.Client, db.GetClusterKey()))
 	if err != nil {
 		return err

@@ -51,10 +51,10 @@ func NewConfigFromClusterKey(ctx context.Context, c client.Client, clusterKey cl
 // GetMysqlDSN returns a data source name
 func (c *Config) GetMysqlDSN() string {
 	return fmt.Sprintf("%s:%s@tcp(%s:%d)/?timeout=5s&multiStatements=true&interpolateParams=true",
-		c.User, c.Password, c.Host, c.Port,
-	)
+		c.User, c.Password, c.Host, c.Port)
 }
 
+//go:generate go run -mod=mod github.com/golang/mock/mockgen -destination=../mocks/mysql/mock_rows.go -package=mysql -build_flags=--mod=mod  github.com/aldor007/mariadb-operator/mysql Rows
 // Rows interface is a subset of mysql.Rows
 type Rows interface {
 	Err() error
@@ -62,6 +62,7 @@ type Rows interface {
 	Scan(dest ...interface{}) error
 }
 
+//go:generate go run -mod=mod github.com/golang/mock/mockgen -destination=../mocks/mysql/mock_sql.go -package=mysql -build_flags=--mod=mod  github.com/aldor007/mariadb-operator/mysql SQLRunner
 // SQLRunner interface is a subset of mysql.DB
 type SQLRunner interface {
 	QueryExec(ctx context.Context, query Query) error
