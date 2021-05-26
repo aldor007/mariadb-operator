@@ -30,6 +30,7 @@ metadata:
 subjects:
   - kind: ServiceAccount
     name: mariadb
+    namespace: {{ .Release.Namespace }}
 roleRef:
   kind: ClusterRole
   name: mariadb-list-pods
