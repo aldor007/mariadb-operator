@@ -71,7 +71,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, log logr.Logger) error {
 	if err != nil && errors.IsNotFound(err) {
 		// Create the deployment
 		log.Info("Creating a new Role", "name", role.Name)
-		err = r.Client.Create(ctx, &sa)
+		err = r.Client.Create(ctx, &role)
 
 		if err != nil {
 			// Deployment failed
@@ -93,7 +93,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, log logr.Logger) error {
 	if err != nil && errors.IsNotFound(err) {
 		// Create the deployment
 		log.Info("Creating a new RoleBinding", "name", role.Name)
-		err = r.Client.Create(ctx, &sa)
+		err = r.Client.Create(ctx, &roleBinding)
 
 		if err != nil {
 			// Deployment failed

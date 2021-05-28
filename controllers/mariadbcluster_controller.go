@@ -21,6 +21,7 @@ import (
 	"github.com/aldor007/mariadb-operator/resources"
 	"github.com/aldor007/mariadb-operator/resources/headless"
 	"github.com/aldor007/mariadb-operator/resources/primary"
+	"github.com/aldor007/mariadb-operator/resources/rbac"
 	"github.com/aldor007/mariadb-operator/resources/secret"
 	"github.com/aldor007/mariadb-operator/resources/service"
 	"github.com/go-logr/logr"
@@ -72,6 +73,8 @@ func (r *MariaDBClusterReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 	}
 	reconcilers := []resources.ComponentReconciler{
 		secret.NewOperatorSecret(r.Client, r.DirectClient, r.Scheme, instance),
+		rbac.NewRBAC(r.Client, r.DirectClient, r.Scheme, instance),
+		primary.NewPrimary(r.Client, r.DirectClient, r.Scheme, instance),
 		primary.NewPrimary(r.Client, r.DirectClient, r.Scheme, instance),
 		headless.NewHeadlessService(r.Client, r.DirectClient, r.Scheme, instance, "primary"),
 		service.NewService(r.Client, r.DirectClient, r.Scheme, instance),
