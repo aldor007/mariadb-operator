@@ -131,6 +131,10 @@ func (c *MariaDBCluster) GetStatefulsetName(dbType string) string {
 	return fmt.Sprintf("%s-%s", c.Name, dbType)
 }
 
+func (c *MariaDBCluster) GetServiceAccountName() string {
+	return fmt.Sprintf("mariadb-%s", c.Name)
+}
+
 func (c *MariaDBCluster) GetConfigHash() string {
 	h := sha256.New()
 	h.Write([]byte(c.Spec.Image))

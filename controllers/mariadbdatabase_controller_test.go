@@ -21,8 +21,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
-
-
 type queryMatcher struct {
 	query mysql.Query
 }
@@ -38,7 +36,6 @@ func (m queryMatcher) Matches(arg interface{}) bool {
 func (m queryMatcher) String() string {
 	return m.query.String()
 }
-
 
 func EqQuery(q mysql.Query) gomock.Matcher {
 	return queryMatcher{query: q}

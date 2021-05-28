@@ -139,7 +139,7 @@ func (r *Reconciler) CreateStatefulSet(dbType string) (appsv1.StatefulSet, error
 					Labels: labels,
 				},
 				Spec: corev1.PodSpec{
-					ServiceAccountName: "mariadb",
+					ServiceAccountName: r.MariaDBCluster.GetServiceAccountName(),
 					Containers: []corev1.Container{{
 						Image:           image,
 						ImagePullPolicy: corev1.PullIfNotPresent,
