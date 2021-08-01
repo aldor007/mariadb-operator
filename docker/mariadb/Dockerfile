@@ -42,7 +42,7 @@ RUN apt update \
 RUN echo '!include /etc/config/my_extra.cnf' >> /etc/mysql/my.cnf
 
 RUN rm /etc/mysql/mariadb.conf.d/50-server.cnf \
-    && chmod -R  0444 /etc/mysql/conf.d/
+    && chmod -R  0444 /etc/mysql/conf.d/ && chmod a+x /usr/bin/container-entrypoint.sh
 
 COPY root /
 RUN bash /usr/libexec/container-setup.sh
