@@ -47,5 +47,5 @@ RUN rm /etc/mysql/mariadb.conf.d/50-server.cnf \
 COPY root /
 RUN bash /usr/libexec/container-setup.sh
 
-RUN chmod a+x /usr/bin/container-entrypoint.sh && chmod -R a+x  /usr/bin
+RUN chmod a+x /usr/bin/container-entrypoint.sh && chmod -R a+x  /usr/bin &&  chmod -R a+x  /usr/share/container-scripts/mysql/
 ENTRYPOINT ["/usr/bin/container-entrypoint.sh"]
