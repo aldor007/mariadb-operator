@@ -30,9 +30,6 @@ else
 	if [  -f "/var/lib/mysql/grastate.dat" ]; then
 	  if  grep -q "safe_to_bootstrap: 1" "/var/lib/mysql/grastate.dat"; then
       echo "safe_to_bootstrap present"
-    else
-	    echo "safe_to_bootstrap: 1" >> /var/lib/mysql/grastate.dat
-	    chown mysql:mysql /var/lib/mysql/grastate.dat
     fi
   else
 	    echo "safe_to_bootstrap: 1" > /var/lib/mysql/grastate.dat
