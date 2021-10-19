@@ -41,9 +41,9 @@ type MariaDBBackupSpec struct {
 	// BackupSecretName the name of secrets that contains the credentials to
 	BackupSecretName string `json:"backupSecretName"`
 
-	// BackupDBName the name of db to bakckup
+	// BackupDBName the name of db to backup
 	// +optional
-	BackupDBName string `json:"backuDBName,omitempty"`
+	BackupDBName string `json:"backupDBName,omitempty"`
 
 	// CronExpression represents cron syntax for kubernetes CronJob
 	// +optional

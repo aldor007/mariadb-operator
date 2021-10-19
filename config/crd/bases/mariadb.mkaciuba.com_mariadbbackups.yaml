@@ -36,8 +36,8 @@ spec:
           spec:
             description: MariaDBBackupSpec defines the desired state of MariaDBBackup
             properties:
-              backuDBName:
-                description: BackupDBName the name of db to bakckup
+              backupDBName:
+                description: BackupDBName the name of db to backup
                 type: string
               backupSecretName:
                 description: BackupSecretName the name of secrets that contains the
