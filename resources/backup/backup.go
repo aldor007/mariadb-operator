@@ -191,6 +191,10 @@ func (r *Reconciler) createPodTemplate(cron *mariadbv1alpha1.MariaDBBackup) core
 							Value: cron.Spec.BackupURL,
 						},
 						{
+							Name:  "BACKUP_DB",
+							Value: cron.Spec.BackupDBName,
+						},
+						{
 							Name:  "HOST",
 							Value: r.MariaDBCluster.GetPrimaryHeadlessSvcName(),
 						},
