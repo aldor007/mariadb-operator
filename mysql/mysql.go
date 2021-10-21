@@ -92,6 +92,10 @@ func NewSQLRunner(cfg *Config, errs ...error) (SQLRunner, func(), error) {
 		return nil, closeFn, err
 	}
 
+	if db == nil {
+		return nil, closeFn, errors.New("db connection not acquired")
+	}
+
 	// close connection function
 	closeFn = func() {
 		if cErr := db.Close(); cErr != nil {

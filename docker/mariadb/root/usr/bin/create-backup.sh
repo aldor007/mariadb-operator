@@ -87,10 +87,10 @@ BACKUP_DIR=/tmp/backup/backup_$(date +%F_%T)
 mkdir -p $BACKUP_DIR
 
 #mariabackup --compress --backup -H $HOST  -P${PORT} --export -u${BACKUP_USER} -p${BACKUP_PASSWORD} --target-dir=${BACKUP_DIR}
-if [[ -z $BACKUP_DB ]]; then
-  mysqldump  --lock-tables  -h $HOST -P${PORT} -u${BACKUP_USER} -p${BACKUP_PASSWORD}  $BACKUP_DB > $BACKUP_DIR/full.sql
-else
+if [ -z "$BACKUP_DB" ]; then
   mysqldump  --lock-tables --all-databases -h $HOST -P${PORT} -u${BACKUP_USER} -p${BACKUP_PASSWORD} > $BACKUP_DIR/full.sql
+else
+  mysqldump  --lock-tables  -h $HOST -P${PORT} -u${BACKUP_USER} -p${BACKUP_PASSWORD}  ${BACKUP_DB} > $BACKUP_DIR/full.sql
 fi
 
 BACKUP_PATH=/tmp/$CLUSTER_NAME-$(date +%F_T).tar.gz

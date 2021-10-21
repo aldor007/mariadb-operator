@@ -84,6 +84,7 @@ func (db *MariaDBBackup) GetConfigHash() string {
 	h := sha256.New()
 	h.Write([]byte(db.Spec.CronExpression))
 	h.Write([]byte(db.Spec.BackupURL))
+	h.Write([]byte(db.Spec.BackupDBName))
 	return hex.EncodeToString(h.Sum(nil))
 }
 
